@@ -15,6 +15,8 @@ zsh Scripts/build.sh Release
 
 应用位于 `build/Build/Products/Debug/MarketCopilot.app` 或 `build/Build/Products/Release/MarketCopilot.app`。脚本为本机架构构建并本地签名；可直接运行。分发给其他 Mac 的 Developer ID 签名和公证需要另行配置证书。
 
+安装本机发行版：`zsh Scripts/install.sh`。默认安装到 `/Applications/MarketCopilot.app` 并打开设置；已有版本先备份到 `~/Library/Application Support/MarketCopilot/Previous Versions/`，账户数据和 Keychain 不会被删除。
+
 ## 连接账户
 
 点击菜单栏的 Portfolio / Cash → Settings → Account：
