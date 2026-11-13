@@ -67,7 +67,8 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 - 持仓更新保留已有显示顺序，新持仓追加到底部；关闭后移除。图标固定为 32×32。标题箭头使用官方未实现收益 `unrealized_pnl` 的正负：非负向上、负数向下，随持仓更新切换；点击整张持仓打开 Polymarket Perps。
 - 抽屉使用系统 `.fill.quaternary` 背景，实时适应深浅外观。远程图标先生成完整的固定方形位图；DOGE 这类内嵌 PNG 的简单 SVG 包装会先解包，避免只显示局部图案。
 - General / 通用 → Language / 语言：支持跟随系统、English、简体中文与繁體中文，选择后立即生效并保存。
-- General / 通用 → Cash offset / 现金偏移：输入 `-500`、`+10` 或普通小数，点击应用或按回车。合计 Cash = 已知来源的 Cash 总和 + offset；不修改 Predictions / Perps 原始余额或 Portfolio。该设置自动保存，不需要重新连接账户。尚无任何余额数据时仍显示 `—`，offset 不会伪装成真实余额。
+- General / 通用 → Cash offsets / 现金偏移：分别填写 Predictions 和 Perps 的 `-500`、`+10` 或普通小数，点击应用或按回车。每项 offset 同时影响该产品在菜单中的 Cash 和 Portfolio，菜单栏合计再把两类调整后的金额相加。设置会自动保存，无需重新连接账户。
+- offset 只作用于显示层，官方原始数据与缓存保持原值；不会在每次刷新后重复叠加，也不改变持仓头寸、保证金、Funding 或盈亏。缺少来源且未设置偏移时显示 `—`；显式设置非零偏移时可显示该手动金额，悬停仍会说明数据源不可用。旧版的单一合计 offset 会一次性迁移到 Perps offset，可在设置中重新分配。
 - 点击行情数值可通过悬停说明查看 mark / bid / ask。原稿 `Liq. price` 表示清算价。
 - Updates 可分别选择 WebSocket 优先或仅轮询，设置 1–300 秒轮询间隔和 10–600 秒校准间隔。
 - 官方 Perps 账户推送约每 5 秒一次；行情推送可以更快，画面合并到最多每秒 4 次，避免数字动画反复打断。
@@ -85,6 +86,8 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 | Position / Margin / Funding | 官方 `position_value` / `initial_margin` / `cumulative_funding` |
 
 Perps 现金不会重复加到 Perps Portfolio；杠杆名义头寸只在 Position 显示。回报率使用官方 `return_on_equity × 100%`，不自行猜测分母。Funding 保留官方累计值及其符号。金额计算与解码使用 `Decimal`。
+
+显示偏移的计算：`Predictions Cash / Portfolio 各加 Predictions offset`，`Perps Cash / Portfolio 各加 Perps offset`。合计 Cash 和合计 Portfolio 分别求和，因此每个总额都只包含一次对应的 offset。
 
 ## 验证
 

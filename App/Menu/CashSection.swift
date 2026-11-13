@@ -12,9 +12,9 @@ struct CashSection: View {
                 .clipped()
             SectionHeading(title: "Cash")
             VStack(spacing: DesignTokens.rowGap) {
-                SummaryRow(title: "Predictions", amount: store.snapshot.predictions?.cash,
+                SummaryRow(title: "Predictions", amount: store.balances.predictionCash,
                            symbol: "loupe", helpText: store.predictionStatus, hoverID: "cashPredictions")
-                SummaryRow(title: "Perps", amount: store.snapshot.perps?.cash,
+                SummaryRow(title: "Perps", amount: store.balances.perpsCash,
                            symbol: "arrow.forward.circle.dotted",
                            helpText: L10n.text("Available order margin") + "\n" + L10n.text(store.perpsStatus), hoverID: "cashPerps")
             }.padding(.vertical, 6)

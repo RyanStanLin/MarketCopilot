@@ -17,10 +17,12 @@
 "Add a Polymarket wallet or profile in Settings to include Predictions." = "Add a Polymarket wallet or profile in Settings to include Predictions.";
 "Add or subtract from combined Cash only. Portfolio and individual account balances stay unchanged." = "Add or subtract from combined Cash only. Portfolio and individual account balances stay unchanged.";
 "Adjusted Cash" = "Adjusted Cash";
+"Adjusted Portfolio" = "Adjusted Portfolio";
 "Adjustment" = "Adjustment";
 "Advanced Predictions access (optional)" = "Advanced Predictions access (optional)";
 "Appearance" = "Appearance";
 "Apply cash offset" = "Apply cash offset";
+"Apply cash offsets" = "Apply cash offsets";
 "Ask" = "Ask";
 "Available order margin" = "Available order margin";
 "Bid" = "Bid";
@@ -29,6 +31,7 @@
 "Cash" = "Cash";
 "Cash offset" = "Cash offset";
 "Cash offset: %@" = "Cash offset: %@";
+"Cash offsets" = "Cash offsets";
 "Collapsed" = "Collapsed";
 "Connect Perps in Settings" = "Connect Perps in Settings";
 "Connect account" = "Connect account";
@@ -45,6 +48,7 @@
 "Disconnect account…" = "Disconnect account…";
 "Display language" = "Display language";
 "Display preferences saved." = "Display preferences saved.";
+"Each offset adjusts that account's Cash and Portfolio. Combined totals include both offsets. Position details stay unchanged." = "Each offset adjusts that account's Cash and Portfolio. Combined totals include both offsets. Position details stay unchanged.";
 "Enter a valid Perps account owner address." = "Enter a valid Perps account owner address.";
 "Enter a valid Polymarket account wallet address (0x followed by 40 hex digits)." = "Enter a valid Polymarket account wallet address (0x followed by 40 hex digits).";
 "Enter a valid positive or negative cash offset." = "Enter a valid positive or negative cash offset.";
@@ -83,6 +87,8 @@
 "Passphrase" = "Passphrase";
 "Perps" = "Perps";
 "Perps access needs both the proxy address and its secret." = "Perps access needs both the proxy address and its secret.";
+"Perps cash offset" = "Perps cash offset";
+"Perps offset: %@" = "Perps offset: %@";
 "Perps positions" = "Perps positions";
 "Perps session guide" = "Perps session guide";
 "Perps · delegated credentials" = "Perps · delegated credentials";
@@ -101,6 +107,8 @@
 "Positions" = "Positions";
 "Prediction access needs the signer address, API key, secret and passphrase together." = "Prediction access needs the signer address, API key, secret and passphrase together.";
 "Predictions" = "Predictions";
+"Predictions cash offset" = "Predictions cash offset";
+"Predictions offset: %@" = "Predictions offset: %@";
 "Predictions: %@\nPerps: %@" = "Predictions: %@\nPerps: %@";
 "Profitable position" = "Profitable position";
 "Proxy address" = "Proxy address";

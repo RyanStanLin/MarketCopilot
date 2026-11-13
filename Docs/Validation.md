@@ -35,6 +35,8 @@ The user requested skipping further checks. The subsequent Google-account simpli
 
 The later arrow correction uses the sign of official `unrealized_pnl`, as clarified by the user, rather than price direction. English / Simplified Chinese / Traditional Chinese resources, persisted language and Cash offset, `.fill.quaternary` and bitmap-normalized logo loading were added. The official DOGE SVG was inspected: one 2000×2000 PNG is referenced through an object-bounding-box pattern inside a 1220×1220 SVG. That simple wrapper is extracted before bitmap normalization. The latest Release builds succeeded; behavioral tests and visual checks remain skipped at the user's request. The DMG workflow is prepared locally; repository creation, push and remote execution are deferred by the user.
 
+Cash offsets were subsequently split into Predictions and Perps values. `BalancePresentation` applies each once to that product's Cash and Portfolio, and both menu sections and status-bar totals consume the same presentation. Raw API snapshots and persisted caches remain unchanged. Legacy combined offset data migrates to Perps; subsequent saves write only the two explicit offsets.
+
 ## Visual verification limits
 
 The component render uses the exact local Figma avatar/US100/NVDA assets, typography and spacing. Native material is deliberately replaced by a neutral static surface for ImageRenderer, since ImageRenderer cannot composite an AppKit glass view or capture the desktop backdrop. These images verify component layout and assets; they are not represented as live screenshots or proof of final material pixels.

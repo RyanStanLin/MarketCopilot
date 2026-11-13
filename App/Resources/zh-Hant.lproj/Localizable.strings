@@ -17,10 +17,12 @@
 "Add a Polymarket wallet or profile in Settings to include Predictions." = "請在設置中添加 Polymarket 錢包或個人主頁以顯示預測市場資產。";
 "Add or subtract from combined Cash only. Portfolio and individual account balances stay unchanged." = "僅對合計現金進行加減調整，不改變總資產或各賬戶的原始餘額。";
 "Adjusted Cash" = "調整後現金";
+"Adjusted Portfolio" = "調整後總資產";
 "Adjustment" = "調整金額";
 "Advanced Predictions access (optional)" = "預測市場高級訪問（可選）";
 "Appearance" = "外觀";
 "Apply cash offset" = "應用現金偏移";
+"Apply cash offsets" = "應用現金偏移";
 "Ask" = "賣一價";
 "Available order margin" = "可用下單保證金";
 "Bid" = "買一價";
@@ -29,6 +31,7 @@
 "Cash" = "現金";
 "Cash offset" = "現金偏移";
 "Cash offset: %@" = "現金偏移：%@";
+"Cash offsets" = "現金偏移";
 "Collapsed" = "已折疊";
 "Connect Perps in Settings" = "請在設置中連接永續賬戶";
 "Connect account" = "連接賬戶";
@@ -45,6 +48,7 @@
 "Disconnect account…" = "斷開賬戶…";
 "Display language" = "顯示語言";
 "Display preferences saved." = "顯示設置已保存。";
+"Each offset adjusts that account's Cash and Portfolio. Combined totals include both offsets. Position details stay unchanged." = "每項偏移同時調整對應賬戶的現金和總資產，合計包含兩項偏移。持倉明細保持不變。";
 "Enter a valid Perps account owner address." = "請輸入有效的永續賬戶所有者地址。";
 "Enter a valid Polymarket account wallet address (0x followed by 40 hex digits)." = "請輸入有效的 Polymarket 賬戶錢包地址（0x 開頭，後接 40 位十六進制字符）。";
 "Enter a valid positive or negative cash offset." = "請輸入有效的現金偏移金額，支持正數和負數。";
@@ -83,6 +87,8 @@
 "Passphrase" = "口令";
 "Perps" = "永續合約";
 "Perps access needs both the proxy address and its secret." = "永續賬戶訪問需要同時填寫代理地址和 Secret。";
+"Perps cash offset" = "永續合約現金偏移";
+"Perps offset: %@" = "永續合約偏移：%@";
 "Perps positions" = "永續合約持倉";
 "Perps session guide" = "永續合約會話指南";
 "Perps · delegated credentials" = "永續合約 · 委託憑證";
@@ -101,6 +107,8 @@
 "Positions" = "持倉";
 "Prediction access needs the signer address, API key, secret and passphrase together." = "預測市場高級訪問需要同時填寫簽名者地址、API 密鑰、Secret 和口令。";
 "Predictions" = "預測市場";
+"Predictions cash offset" = "預測市場現金偏移";
+"Predictions offset: %@" = "預測市場偏移：%@";
 "Predictions: %@\nPerps: %@" = "預測市場：%@\n永續合約：%@";
 "Profitable position" = "持倉盈利";
 "Proxy address" = "代理地址";

@@ -25,13 +25,15 @@ Drag MarketCopilot to Applications, then open it from Applications.
 Click Portfolio / Cash in the menu bar to open the menu, then Settings.
 Predictions: enter your wallet address, @username or Polymarket profile URL.
 Perps: enter an official delegated session proxy address and secret.
-General: choose English / 简体中文 / 繁體中文 and set a signed Cash offset.
+General: choose English / 简体中文 / 繁體中文 and set separate Predictions / Perps Cash offsets.
+Each offset is included once in that account's Cash and Portfolio, including menu-bar totals.
 
 将 MarketCopilot 拖入 Applications，再从“应用程序”启动。
 点击菜单栏的总资产 / 现金打开菜单，在设置中连接账户。
 Google / 邮箱的预测市场账户仅需钱包、@用户名或个人主页链接。
 永续合约需要官方委托会话的代理地址与 Secret。
-“通用”中可切换语言，并设置正负现金偏移。
+“通用”中可切换语言，并分别设置预测市场 / 永续合约的正负现金偏移。
+每项偏移同时影响对应账户的现金、总资产，以及菜单栏合计。
 TEXT
 hdiutil create -volname MarketCopilot -srcfolder "$staging_directory" -format UDZO -ov "$dmg_path"
 shasum -a 256 "$dmg_path" > "${dmg_path}.sha256"

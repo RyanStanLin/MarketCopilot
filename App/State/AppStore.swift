@@ -58,16 +58,28 @@ final class AppStore {
         DesignTokens.menuHeight(expanded: true, positionCount: positions.count, maximum: maximumMenuHeight)
             - DesignTokens.collapsedHeight + DesignTokens.separatorHeight
     }
-    var statusPortfolio: Decimal? { isDesignPreview ? Decimal(string: "26.09") : snapshot.portfolio }
+    var balances: BalancePresentation {
+        BalancePresentation(snapshot: snapshot, predictionCashOffset: refreshSettings.predictionCashOffset,
+                            perpsCashOffset: refreshSettings.perpsCashOffset)
+    }
+    var statusPortfolio: Decimal? {
+        if isDesignPreview {
+            return Decimal(string: "26.09").map { $0 + refreshSettings.predictionCashOffset + refreshSettings.perpsCashOffset }
+        }
+        return balances.portfolio
+    }
     var statusCash: Decimal? {
-        let cash = isDesignPreview ? Decimal(string: "8.01") : snapshot.cash
-        return cash.map { $0 + refreshSettings.cashOffset }
+        if isDesignPreview {
+            return Decimal(string: "8.01").map { $0 + refreshSettings.predictionCashOffset + refreshSettings.perpsCashOffset }
+        }
+        return balances.cash
     }
     var locale: Locale { refreshSettings.language.locale }
     var statusDescription: String {
         let totals = snapshot.hasPartialTotals ? L10n.text("Totals include the available balances and holdings. Some sources are unavailable.") + "\n" : ""
-        let offset = refreshSettings.cashOffset == 0 ? "" : "\n" + L10n.format("Cash offset: %@", MarketFormat.currency(refreshSettings.cashOffset, signed: true))
-        return totals + L10n.text(predictionStatus) + "\n" + L10n.text(perpsStatus) + offset
+        let predictionOffset = refreshSettings.predictionCashOffset == 0 ? "" : "\n" + L10n.format("Predictions offset: %@", MarketFormat.currency(refreshSettings.predictionCashOffset, signed: true))
+        let perpsOffset = refreshSettings.perpsCashOffset == 0 ? "" : "\n" + L10n.format("Perps offset: %@", MarketFormat.currency(refreshSettings.perpsCashOffset, signed: true))
+        return totals + L10n.text(predictionStatus) + "\n" + L10n.text(perpsStatus) + predictionOffset + perpsOffset
     }
 
     func toggleDrawer() {
