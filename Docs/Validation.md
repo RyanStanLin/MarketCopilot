@@ -33,6 +33,8 @@ The drawer revision passed the four focused `MenuInteractionTests` and a Debug b
 
 The user requested skipping further checks. The subsequent Google-account simplification, stable position order, square icons, price-direction arrows, full-row links and partial totals were implemented with tests and UI checks skipped as requested. Existing total assertions were adjusted to the new behavior but not run. The Release build succeeded to produce the installed application. The on-chain cash path and profile resolver have not been exercised with a live account in this revision.
 
+The later arrow correction uses the sign of official `unrealized_pnl`, as clarified by the user, rather than price direction. English / Simplified Chinese / Traditional Chinese resources, persisted language and Cash offset, `.fill.quaternary` and bitmap-normalized logo loading were added. The official DOGE SVG was inspected: one 2000×2000 PNG is referenced through an object-bounding-box pattern inside a 1220×1220 SVG. That simple wrapper is extracted before bitmap normalization. The latest Release builds succeeded; behavioral tests and visual checks remain skipped at the user's request. The DMG workflow is prepared locally; repository creation, push and remote execution are deferred by the user.
+
 ## Visual verification limits
 
 The component render uses the exact local Figma avatar/US100/NVDA assets, typography and spacing. Native material is deliberately replaced by a neutral static surface for ImageRenderer, since ImageRenderer cannot composite an AppKit glass view or capture the desktop backdrop. These images verify component layout and assets; they are not represented as live screenshots or proof of final material pixels.

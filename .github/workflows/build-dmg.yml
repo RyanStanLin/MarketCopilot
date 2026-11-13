@@ -1,0 +1,58 @@
+name: Build DMG
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dmg:
+    name: macOS 27 · Apple Silicon
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Select Xcode 27 or newer
+        shell: bash
+        run: |
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import glob
+          import plistlib
+          from pathlib import Path
+          candidates = []
+          for name in glob.glob('/Applications/Xcode*.app'):
+              info = Path(name) / 'Contents' / 'Info.plist'
+              if not info.exists():
+                  continue
+              version = plistlib.loads(info.read_bytes())['CFBundleShortVersionString']
+              parts = tuple(int(v) for v in version.split('.') if v.isdigit())
+              if parts and parts[0] >= 27:
+                  candidates.append((parts, name))
+          if not candidates:
+              raise SystemExit('Xcode 27 / Swift 6.4 or newer is required.')
+          selected = max(candidates)[1]
+          print(f'DEVELOPER_DIR={selected}/Contents/Developer')
+          PY
+
+      - name: Build Release
+        run: zsh Scripts/build.sh Release
+
+      - name: Create drag-to-install DMG
+        run: zsh Scripts/package-dmg.sh
+
+      - name: Upload DMG and checksum
+        uses: actions/upload-artifact@v7
+        with:
+          name: MarketCopilot-macOS-arm64-${{ github.sha }}
+          path: |
+            dist/*.dmg
+            dist/*.dmg.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
