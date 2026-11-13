@@ -16,16 +16,26 @@ final class AppStore {
     var predictionStatus = "Connect your account in Settings."
     var perpsStatus = "Connect your account in Settings."
     var isRefreshing = false
+    var account = AccountConfiguration()
+    var accountDraft = AccountConfiguration()
+    var refreshSettings = RefreshSettings()
+    var refreshDraft = RefreshSettings()
+    var secretsDraft = AccountSecrets()
+    var settingsNotice = ""
+    var isConnecting = false
     let isDesignPreview: Bool
 
     @ObservationIgnored var openSettings: () -> Void = {}
     @ObservationIgnored var layoutChanged: () -> Void = {}
     @ObservationIgnored var refreshRequested: () -> Void = {}
     @ObservationIgnored var drawerChanged: () -> Void = {}
+    @ObservationIgnored var settingsApplied: () -> Void = {}
+    @ObservationIgnored var repository: WorkspaceRepository?
 
     init(designPreview: Bool = false) {
         isDesignPreview = designPreview
         if designPreview { DesignFixture.populate(self) }
+        else { loadWorkspace() }
     }
 
     var positions: [PerpPosition] { snapshot.perps?.positions ?? [] }

@@ -65,7 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func showSettings() {
         closeMenu()
         if settingsWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 440),
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 580, height: 640),
                                   styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
             window.title = "MarketCopilot Settings"
             window.contentView = NSHostingView(rootView: SettingsRoot(store: store))

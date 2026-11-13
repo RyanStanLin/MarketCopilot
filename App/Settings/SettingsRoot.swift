@@ -4,16 +4,22 @@ struct SettingsRoot: View {
     let store: AppStore
 
     var body: some View {
-        Form {
-            Section("Account") {
-                Text("Connect official Polymarket API credentials to view your portfolio.")
-                Text(store.predictionStatus).foregroundStyle(.secondary)
-                Text(store.perpsStatus).foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            TabView {
+                Tab("Account", systemImage: "person.crop.circle") { AccountSettings(store: store) }
+                Tab("Updates", systemImage: "arrow.triangle.2.circlepath") { UpdateSettings(store: store) }
+                Tab("General", systemImage: "gearshape") { GeneralSettings(store: store) }
             }
-            Section {
-                Button("Quit MarketCopilot") { NSApp.terminate(nil) }
-            }
+            Divider()
+            HStack(spacing: 12) {
+                Text(store.settingsNotice).font(.caption).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled)
+                if store.isConnecting { ProgressView().controlSize(.small) }
+                Button("Save & Connect", action: store.saveWorkspace)
+                    .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
+                    .disabled(store.isConnecting).accessibilityIdentifier("saveAccount")
+            }.padding(16)
         }
-        .formStyle(.grouped).frame(width: 540, height: 440)
+        .frame(width: 580, height: 640)
     }
 }
