@@ -14,11 +14,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var localMonitor: Any?
     private var settingsWindow: NSWindow?
     private var coordinator: AppCoordinator?
+    private var menuTopLeft: CGPoint?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         item.button?.target = self
         item.button?.action = #selector(toggleMenu)
+        item.button?.sendAction(on: [.leftMouseDown])
         item.button?.setAccessibilityLabel(MarketCore.name)
         statusItem = item
         store.openSettings = { [weak self] in self?.showSettings() }
@@ -26,8 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updateStatus()
         observeStatus()
         installMonitors()
-        if CommandLine.arguments.contains("--dark") { NSApp.appearance = NSAppearance(named: .darkAqua) }
-        if CommandLine.arguments.contains("--light") { NSApp.appearance = NSAppearance(named: .aqua) }
+        NSApp.appearance = nil
         #if DEBUG
         if CommandLine.arguments.contains("--validate-native") && store.isDesignPreview {
             DispatchQueue.main.async { [weak self] in
@@ -62,13 +63,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if store.isMenuOpen { closeMenu(); return }
         let menu = panel ?? MenuPanel()
         if panel == nil {
-            let host = NSHostingView(rootView: PortfolioMenu(store: store))
+            let host = NSHostingView(rootView: MenuHostRoot(store: store))
             host.sizingOptions = []
             menu.contentView = host
             menu.onCancel = { [weak self] in self?.closeMenu() }
         }
         let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
         let visible = (window.screen ?? NSScreen.main)?.visibleFrame ?? .zero
+        let x = min(max(visible.minX + 8, anchor.minX), visible.maxX - DesignTokens.menuWidth - 8)
+        menuTopLeft = CGPoint(x: x, y: anchor.minY - 4)
         store.maximumMenuHeight = max(DesignTokens.collapsedHeight, anchor.minY - visible.minY - 12)
         panel = menu
         resizeMenu(animated: false)
@@ -101,15 +104,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         withAnimation(NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : .easeInOut(duration: 0.16)) { store.isMenuOpen = false } completion: { [weak self] in
             guard let self, !self.store.isMenuOpen else { return }
             self.panel?.orderOut(nil)
+            self.menuTopLeft = nil
         }
     }
 
     private func resizeMenu(animated: Bool) {
-        guard let button = statusItem?.button, let window = button.window, let panel else { return }
-        let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
-        let visible = (window.screen ?? NSScreen.main)?.visibleFrame ?? .zero
-        let x = min(max(visible.minX + 8, anchor.minX), visible.maxX - DesignTokens.menuWidth - 8)
-        let frame = NSRect(x: x, y: anchor.minY - 4 - store.menuHeight, width: DesignTokens.menuWidth, height: store.menuHeight)
+        guard let panel, let menuTopLeft else { return }
+        let frame = MenuInteraction.frame(topLeft: menuTopLeft, width: DesignTokens.menuWidth, height: store.menuHeight)
         if animated && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.38
@@ -151,15 +152,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func installMonitors() {
         clickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            Task { @MainActor in self?.closeMenu() }
+            let point = NSEvent.mouseLocation
+            Task { @MainActor in self?.dismissIfOutside(point) }
         }
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self] event in
             guard let self else { return event }
             if event.type == .keyDown && event.keyCode == 53 && self.store.isMenuOpen { self.closeMenu(); return nil }
-            if event.type != .keyDown, event.window !== self.panel, event.window !== self.statusItem?.button?.window {
-                self.closeMenu()
+            if event.type != .keyDown {
+                self.dismissIfOutside(NSEvent.mouseLocation)
             }
             return event
         }
+    }
+
+    private func dismissIfOutside(_ point: CGPoint) {
+        guard store.isMenuOpen, let panel, let button = statusItem?.button, let window = button.window else { return }
+        let statusFrame = window.convertToScreen(button.convert(button.bounds, to: nil))
+        if MenuInteraction.shouldDismiss(point: point, menuFrame: panel.frame, statusFrame: statusFrame) { closeMenu() }
     }
 }
