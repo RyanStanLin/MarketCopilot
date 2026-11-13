@@ -11,7 +11,7 @@ struct MenuHeader: View {
                 HStack(spacing: 8) {
                     Text(store.accountName).foregroundStyle(DesignTokens.secondary).lineLimit(1)
                     RemoteImage(url: store.avatarURL, fixtureName: store.isDesignPreview ? "FigmaAvatar" : nil,
-                                fallbackSymbol: "person.crop.circle.fill")
+                                fallbackSymbol: "person.crop.circle.fill", size: DesignTokens.avatarSize)
                         .frame(width: DesignTokens.avatarSize, height: DesignTokens.avatarSize)
                         .clipShape(.circle)
                         .overlay(Circle().strokeBorder(DesignTokens.iconFill, lineWidth: 1))

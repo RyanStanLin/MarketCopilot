@@ -64,7 +64,7 @@ struct PredictionClientTests {
         let result = try await client.snapshot(account: account, credentials: nil)
         #expect(result.holdingsValue == Decimal(string: "123456.1234"))
         #expect(result.cash == nil)
-        #expect(result.portfolio == nil)
+        #expect(result.portfolio == Decimal(string: "123456.1234"))
     }
 
     @Test func rateLimitPreservesRetryAfterWithoutExposingResponseSecrets() async throws {

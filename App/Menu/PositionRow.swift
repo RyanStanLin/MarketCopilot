@@ -5,35 +5,37 @@ struct PositionRow: View {
     let position: PerpPosition
     let store: AppStore
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
 
     private var instrument: Instrument? { store.instruments[position.id] }
     private var quote: MarketQuote? { store.quotes[position.id] }
     private var logo: URL? { colorScheme == .dark ? (instrument?.darkLogo ?? instrument?.lightLogo) : instrument?.lightLogo }
     private var fixture: String? { store.isDesignPreview ? (position.id == 2 ? "FigmaUS100" : "FigmaNVDA") : nil }
     private var digits: Int { instrument?.priceDecimals ?? 2 }
+    private var priceIncreased: Bool {
+        if let mark = quote?.mark { return mark >= position.entryPrice }
+        return position.isLong ? position.unrealizedPnl >= 0 : position.unrealizedPnl <= 0
+    }
     private var quoteHelp: String {
         "Mark: \(MarketFormat.currency(quote?.mark, fractionDigits: digits))\nBid: \(MarketFormat.currency(quote?.bid, fractionDigits: digits))\nAsk: \(MarketFormat.currency(quote?.ask, fractionDigits: digits))"
     }
 
     var body: some View {
+        Button(action: openPosition) {
         VStack(spacing: DesignTokens.detailGap) {
             HStack(alignment: .top, spacing: 4) {
                 HStack(spacing: DesignTokens.iconGap) {
                     RemoteImage(url: logo, fixtureName: fixture, fallbackSymbol: "chart.line.uptrend.xyaxis")
-                        .frame(width: 32, height: 32).clipShape(.rect(cornerRadius: 10))
+                        .clipShape(.rect(cornerRadius: 10))
                         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(DesignTokens.tertiary, lineWidth: 1))
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 4) {
                             Text(instrument?.displaySymbol ?? position.symbol).font(DesignTokens.amount)
                                 .lineLimit(1).minimumScaleFactor(0.75)
-                            if let destination = store.perpsWebsiteURL {
-                                Link(destination: destination) {
-                                    Image(systemName: "arrow.up.right.circle.fill")
-                                        .font(.system(size: 14)).foregroundStyle(DesignTokens.secondary)
-                                }.buttonStyle(PressButtonStyle())
-                                    .menuHover(.icon, id: "position-link-\(position.id)")
-                                    .help("Open Polymarket Perps")
-                            }
+                            Image(systemName: priceIncreased ? "arrow.up.right.circle.fill" : "arrow.down.right.circle.fill")
+                                .font(.system(size: 14)).foregroundStyle(DesignTokens.secondary)
+                                .contentTransition(.symbolEffect(.replace))
+                                .accessibilityLabel(priceIncreased ? "Price up from entry" : "Price down from entry")
                         }.frame(height: 20)
                         Text("\(position.isLong ? "Long" : "Short") \(position.leverage)x")
                             .font(DesignTokens.caption).foregroundStyle(DesignTokens.secondary)
@@ -62,9 +64,19 @@ struct PositionRow: View {
             }.padding(.leading, DesignTokens.detailIndent)
         }
         .padding(.vertical, 6)
+        .contentShape(Rectangle())
         .animation(DesignTokens.numberAnimation, value: position)
+        .animation(DesignTokens.numberAnimation, value: priceIncreased)
+        }
+        .buttonStyle(PressButtonStyle())
+        .disabled(store.perpsWebsiteURL == nil)
+        .help("Open Polymarket Perps")
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("position-\(position.id)")
         .menuHover(.position, id: "position-\(position.id)")
+    }
+
+    private func openPosition() {
+        if let destination = store.perpsWebsiteURL { openURL(destination) }
     }
 }

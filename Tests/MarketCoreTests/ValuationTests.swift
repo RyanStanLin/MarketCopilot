@@ -13,15 +13,17 @@ struct ValuationTests {
         #expect(snapshot.cash == Decimal(string: "3.00"))
     }
 
-    @Test func missingProductDoesNotBecomeZeroInTotals() {
+    @Test func totalsUseAvailableProductsAndKeepEntirelyMissingBalancesUnavailable() {
         let onlyPrediction = PortfolioSnapshot(predictions: PredictionSnapshot(holdingsValue: 10, cash: 5))
-        #expect(onlyPrediction.portfolio == nil)
-        #expect(onlyPrediction.cash == nil)
+        #expect(onlyPrediction.portfolio == 15)
+        #expect(onlyPrediction.cash == 5)
         let missingCash = PortfolioSnapshot(
             predictions: PredictionSnapshot(holdingsValue: 10, cash: nil),
             perps: PerpsSnapshot(portfolio: 2, cash: 1, positions: []))
-        #expect(missingCash.portfolio == nil)
-        #expect(missingCash.cash == nil)
+        #expect(missingCash.portfolio == 12)
+        #expect(missingCash.cash == 1)
+        #expect(PortfolioSnapshot().portfolio == nil)
+        #expect(PortfolioSnapshot().cash == nil)
     }
 
     @Test func confirmedEmptyAccountsAreValidZeroBalances() {

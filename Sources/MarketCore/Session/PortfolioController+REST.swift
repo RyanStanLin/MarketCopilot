@@ -63,7 +63,8 @@ extension PortfolioController {
 
     func acceptPerps(_ value: PerpsSnapshot) {
         guard value.timestamp >= (snapshot.perps?.timestamp ?? .distantPast) else { return }
-        snapshot.perps = value; onUpdate?(.perps(value))
+        let ordered = value.preservingPositionOrder(from: snapshot.perps?.positions ?? [])
+        snapshot.perps = ordered; onUpdate?(.perps(ordered))
     }
 
     func mergeQuotes(_ updates: [Int: MarketQuote], replaceBook: Bool = false) {

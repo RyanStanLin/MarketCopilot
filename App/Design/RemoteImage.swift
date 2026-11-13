@@ -5,19 +5,23 @@ struct RemoteImage: View {
     let url: URL?
     var fixtureName: String?
     var fallbackSymbol = "photo"
+    var size: CGFloat = DesignTokens.iconSize
     @State private var loaded: NSImage?
 
     var body: some View {
         Group {
             if let fixtureName {
-                Image(fixtureName).resizable().aspectRatio(contentMode: .fill)
+                Image(fixtureName).resizable()
             } else if let loaded {
-                Image(nsImage: loaded).resizable().aspectRatio(contentMode: .fit)
+                Image(nsImage: loaded).resizable()
             } else {
                 Image(systemName: fallbackSymbol).resizable().scaledToFit()
                     .foregroundStyle(DesignTokens.tertiary).padding(4)
             }
         }
+        .frame(width: size, height: size)
+        .clipped()
+        .fixedSize()
         .task(id: url, load)
         .accessibilityHidden(true)
     }

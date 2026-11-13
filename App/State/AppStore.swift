@@ -58,7 +58,10 @@ final class AppStore {
     }
     var statusPortfolio: Decimal? { isDesignPreview ? Decimal(string: "26.09") : snapshot.portfolio }
     var statusCash: Decimal? { isDesignPreview ? Decimal(string: "8.01") : snapshot.cash }
-    var statusDescription: String { predictionStatus + "\n" + perpsStatus }
+    var statusDescription: String {
+        let totals = snapshot.hasPartialTotals ? "Totals include the available balances and holdings. Some sources are unavailable.\n" : ""
+        return totals + predictionStatus + "\n" + perpsStatus
+    }
 
     func toggleDrawer() {
         isPerpsExpanded.toggle()
