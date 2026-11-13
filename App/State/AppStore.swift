@@ -27,12 +27,15 @@ final class AppStore {
     let isDesignPreview: Bool
 
     @ObservationIgnored var openSettings: () -> Void = {}
-    @ObservationIgnored var layoutChanged: () -> Void = {}
+    @ObservationIgnored var renderedMenuHeightChanged: (CGFloat) -> Void = { _ in }
     @ObservationIgnored var refreshRequested: () -> Void = {}
     @ObservationIgnored var drawerChanged: () -> Void = {}
     @ObservationIgnored var settingsApplied: () -> Void = {}
     @ObservationIgnored var repository: WorkspaceRepository?
     @ObservationIgnored var activeSecrets = AccountSecrets()
+    #if DEBUG
+    @ObservationIgnored var menuLayoutObserved: (String, CGRect) -> Void = { _, _ in }
+    #endif
 
     init(designPreview: Bool = false) {
         #if DEBUG
@@ -49,15 +52,16 @@ final class AppStore {
     var menuHeight: CGFloat {
         DesignTokens.menuHeight(expanded: isPerpsExpanded, positionCount: positions.count, maximum: maximumMenuHeight)
     }
-    var drawerHeight: CGFloat { menuHeight - DesignTokens.collapsedHeight + DesignTokens.separatorHeight }
+    var expandedDrawerHeight: CGFloat {
+        DesignTokens.menuHeight(expanded: true, positionCount: positions.count, maximum: maximumMenuHeight)
+            - DesignTokens.collapsedHeight + DesignTokens.separatorHeight
+    }
     var statusPortfolio: Decimal? { isDesignPreview ? Decimal(string: "26.09") : snapshot.portfolio }
     var statusCash: Decimal? { isDesignPreview ? Decimal(string: "8.01") : snapshot.cash }
     var statusDescription: String { predictionStatus + "\n" + perpsStatus }
 
     func toggleDrawer() {
-        let motion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-        withAnimation(motion ? nil : DesignTokens.drawerAnimation) { isPerpsExpanded.toggle() }
-        layoutChanged()
+        isPerpsExpanded.toggle()
         drawerChanged()
         if isPerpsExpanded { refreshRequested() }
     }

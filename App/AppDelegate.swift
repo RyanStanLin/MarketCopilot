@@ -2,7 +2,6 @@ import AppKit
 import SwiftUI
 import MarketCore
 import Observation
-import QuartzCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -24,7 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.setAccessibilityLabel(MarketCore.name)
         statusItem = item
         store.openSettings = { [weak self] in self?.showSettings() }
-        store.layoutChanged = { [weak self] in self?.resizeMenu(animated: true) }
+        store.renderedMenuHeightChanged = { [weak self] height in self?.resizeMenu(height: height) }
         updateStatus()
         observeStatus()
         installMonitors()
@@ -41,6 +40,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 DesignRenderer.render(self.store)
+            }
+            return
+        }
+        if CommandLine.arguments.contains("--validate-motion") && store.isDesignPreview {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.toggleMenu()
+                // Exercise the complete two-position fixture even before the status bar has laid out.
+                self.store.maximumMenuHeight = 760
+                if let panel = self.panel { MenuMotionValidation.run(store: self.store, panel: panel) }
             }
             return
         }
@@ -74,7 +83,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuTopLeft = CGPoint(x: x, y: anchor.minY - 4)
         store.maximumMenuHeight = max(DesignTokens.collapsedHeight, anchor.minY - visible.minY - 12)
         panel = menu
-        resizeMenu(animated: false)
+        resizeMenu(height: store.menuHeight)
         menu.makeKeyAndOrderFront(nil)
         withAnimation(NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : .spring(response: 0.26, dampingFraction: 0.9)) { store.isMenuOpen = true }
         store.refreshRequested()
@@ -108,16 +117,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func resizeMenu(animated: Bool) {
+    private func resizeMenu(height: CGFloat) {
         guard let panel, let menuTopLeft else { return }
-        let frame = MenuInteraction.frame(topLeft: menuTopLeft, width: DesignTokens.menuWidth, height: store.menuHeight)
-        if animated && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.38
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                panel.animator().setFrame(frame, display: true)
-            }
-        } else { panel.setFrame(frame, display: true) }
+        let scale = panel.backingScaleFactor
+        let frame = MenuInteraction.frame(topLeft: menuTopLeft, width: DesignTokens.menuWidth,
+                                          height: ceil(height * scale) / scale)
+        guard panel.frame != frame else { return }
+        // SwiftUI owns the spring; AppKit follows its actual rendered height without a second animation.
+        panel.setFrame(frame, display: true)
     }
 
     private func updateStatus() {

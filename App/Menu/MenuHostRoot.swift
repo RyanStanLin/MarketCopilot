@@ -7,8 +7,7 @@ struct MenuHostRoot: View {
         ZStack(alignment: .topLeading) {
             PortfolioMenu(store: store)
         }
-        // The panel and drawer have different animation curves. Never center the
-        // animated content inside the changing NSHostingView bounds.
+        // The menu stays at the panel's top while its measured height changes.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }

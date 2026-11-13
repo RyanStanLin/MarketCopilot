@@ -6,9 +6,7 @@ extension AppStore {
         switch update {
         case .predictions(let value): snapshot.predictions = value
         case .perps(let value):
-            let oldCount = positions.count
             snapshot.perps = value
-            if oldCount != positions.count { layoutChanged() }
         case .quotes(let values): quotes = values
         case .instruments(let values): instruments = values
         case .profile(let value):

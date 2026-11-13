@@ -2,10 +2,13 @@ import SwiftUI
 
 struct CashSection: View {
     let store: AppStore
+    let separatorHeight: CGFloat
 
     var body: some View {
         VStack(spacing: 0) {
-            if !store.isPerpsExpanded { MenuSeparator() }
+            MenuSeparator()
+                .frame(height: separatorHeight, alignment: .top)
+                .clipped()
             SectionHeading(title: "Cash")
             VStack(spacing: DesignTokens.rowGap) {
                 SummaryRow(title: "Predictions", amount: store.snapshot.predictions?.cash,

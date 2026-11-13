@@ -24,10 +24,17 @@
 | Polling choice and silent-stream fallback | `pollingModeCreatesNoWebSocketSubscriptions`, `quietPortfolioStreamFallsBackToPollingAfterFifteenSeconds` |
 | Quote merge and stale update protection | `olderRestSnapshotsCannotReplaceNewerPushAndQuoteUpdatesMerge`, `emptyOrderBookClearsOldBidAskWithoutDiscardingMark` |
 | Account and interval validation | `validatesAddressesWithoutConfusingSignerAndAccount`, `rejectsPartialCredentialSetsButAllowsPublicAddressSetup`, `refreshIntervalsEnforceFiniteBoundaries` |
+| Status click toggles without an outside-dismiss race | `statusItemClickIsNotAnOutsideDismissBeforeItsToggleAction` |
+| Drawer animation shares one layout progress and preserves the window anchor | `drawerResizeKeepsTopAndLeftEdgesFixedThroughoutTheAnimation`, `drawerAndSeparatorShareOneProgressWithoutChangingTheirCombinedLayout`, `springOvershootCannotRevealDrawerPastItsViewportOrMoveCollapsedContent` |
 | Figma geometry, assets, real native storage | Native checks `collapsedGeometry`, `expandedGeometry`, `drawerClampsToScreen`, `staticAssetsPresent`, `swiftDataAccount`, `swiftDataSettings`, `swiftDataExactDecimalCache`, `swiftDataAccountIsolation`, `keychainRoundTrip`, `keychainIdentityIsolation`, `keychainDelete` |
+| Automatic native light/dark colors | Native checks `followsSystemAppearance`, `fillColorsAdaptToAppearance` |
+
+The drawer revision passed the four focused `MenuInteractionTests` and a Debug build. `--design-preview --validate-motion` sampled 171 native frames across opening, closing and an interrupted reversal. All six checks passed: `sampledIntermediateFrames`, `windowTopAndLeftStayFixed`, `headerStaysAtTop`, `drawerContentStaysBelowParent`, `cashFollowsClippedViewport`, `reversedAnimationReturnsToCollapsedHeight`. The complete two-position fixture is used independently of the status bar's initial screen-height constraint. Geometry sampling verifies positions, not composited pixels.
+
+The user requested skipping further checks after this revision. No additional suite, Release build or visual verification was run afterward.
 
 ## Visual verification limits
 
 The component render uses the exact local Figma avatar/US100/NVDA assets, typography and spacing. Native material is deliberately replaced by a neutral static surface for ImageRenderer, since ImageRenderer cannot composite an AppKit glass view or capture the desktop backdrop. These images verify component layout and assets; they are not represented as live screenshots or proof of final material pixels.
 
-The desktop capture tool returned ScreenCaptureKit error `-3811` on both attempts. A visible-desktop pixel overlay, actual mouse/keyboard interaction, multi-monitor behavior and physical sleep/wake therefore remain manual checks. Private authenticated account validation also remains pending until the user enters their own credentials in the app.
+Settings screenshots and native menu expansion through accessibility were obtained earlier. Capturing the floating menu remained unreliable (ScreenCaptureKit `-3811`); the latest app connection attempts timed out (`-10005`). A visible-desktop pixel overlay of the revised animation, multi-monitor behavior and physical sleep/wake remain unverified. Private authenticated account validation remains pending until the user enters their own credentials in the app.

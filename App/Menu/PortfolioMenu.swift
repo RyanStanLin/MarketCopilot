@@ -6,15 +6,10 @@ struct PortfolioMenu: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(spacing: 0) {
-            PortfolioSection(store: store)
-            if store.isPerpsExpanded {
-                PositionsDrawer(store: store)
-                    .transition(.asymmetric(insertion: .opacity.combined(with: .move(edge: .top)), removal: .opacity))
-            }
-            CashSection(store: store)
-        }
-        .frame(width: DesignTokens.menuWidth, height: store.menuHeight, alignment: .top)
+        DrawerMenuLayout(store: store, progress: store.isPerpsExpanded ? 1 : 0,
+                         expandedHeight: store.expandedDrawerHeight)
+        .animation(reduceMotion ? nil : DesignTokens.drawerAnimation, value: store.isPerpsExpanded)
+        .animation(reduceMotion ? nil : DesignTokens.drawerAnimation, value: store.expandedDrawerHeight)
         .background {
             if let staticBackdrop { staticBackdrop } else { GlassSurface() }
         }

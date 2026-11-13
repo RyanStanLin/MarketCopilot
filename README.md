@@ -59,7 +59,7 @@ swift run market-probe              # 官方公共 API / WebSocket 只读连接�
 zsh Scripts/validate.sh             # 原生 Keychain / SwiftData / 布局检查及组件渲染
 ```
 
-Debug 的 `--design-preview` 显式启用 Figma 样例；`--expanded` 展开抽屉，`--light` / `--dark` 指定该进程的外观。样例不会作为联网失败后的备用数据，Release 不启用样例模式。组件渲染位于 `build/Validation/`；原生玻璃与桌面背景的最终合成需要在可见桌面上检查。
+Debug 的 `--design-preview` 显式启用 Figma 样例；`--expanded` 展开抽屉，`--validate-motion` 记录原生窗口和抽屉的动画中间帧。外观始终实时跟随系统。样例不会作为联网失败后的备用数据，Release 不启用样例模式。组件渲染位于 `build/Validation/`；原生玻璃与桌面背景的最终合成需要在可见桌面上检查。
 
 详细验收记录与测试映射见 [Docs/Validation.md](Docs/Validation.md)。
 
