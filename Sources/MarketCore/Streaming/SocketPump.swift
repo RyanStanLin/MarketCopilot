@@ -60,7 +60,9 @@ struct SocketPump: Sendable {
     static func checkError(_ text: String) throws {
         guard let object = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any] else { return }
         if object["error"] != nil || object["type"] as? String == "error" {
-            throw APIError(status: 401, reason: "The streaming server rejected the subscription. Check credentials.")
+            let detail = ((object["error"] as? String) ?? (object["message"] as? String) ?? "").lowercased()
+            let isAuth = ["auth", "credential", "api key", "apikey"].contains(where: detail.contains)
+            throw APIError(status: isAuth ? 401 : 400, reason: "The streaming server rejected the subscription.")
         }
     }
 }

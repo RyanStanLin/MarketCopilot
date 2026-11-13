@@ -37,5 +37,11 @@ struct ConfigurationTests {
         #expect(throws: ConfigurationError.invalidRefreshInterval) { try settings.validated() }
         settings.pollingInterval = .nan
         #expect(throws: ConfigurationError.invalidRefreshInterval) { try settings.validated() }
+        settings.pollingInterval = 301
+        #expect(throws: ConfigurationError.invalidRefreshInterval) { try settings.validated() }
+        settings.pollingInterval = 5; settings.reconciliationInterval = 601
+        #expect(throws: ConfigurationError.invalidRefreshInterval) { try settings.validated() }
+        settings.reconciliationInterval = 9
+        #expect(throws: ConfigurationError.invalidRefreshInterval) { try settings.validated() }
     }
 }

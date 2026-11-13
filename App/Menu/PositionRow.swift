@@ -26,10 +26,12 @@ struct PositionRow: View {
                         HStack(spacing: 4) {
                             Text(instrument?.displaySymbol ?? position.symbol).font(DesignTokens.amount)
                                 .lineLimit(1).minimumScaleFactor(0.75)
-                            Link(destination: URL(string: "https://polymarket.com/perps")!) {
-                                Image(systemName: "arrow.up.right.circle.fill")
-                                    .font(.system(size: 14)).foregroundStyle(DesignTokens.secondary)
-                            }.buttonStyle(PressButtonStyle()).help("Open Polymarket Perps")
+                            if let destination = store.perpsWebsiteURL {
+                                Link(destination: destination) {
+                                    Image(systemName: "arrow.up.right.circle.fill")
+                                        .font(.system(size: 14)).foregroundStyle(DesignTokens.secondary)
+                                }.buttonStyle(PressButtonStyle()).help("Open Polymarket Perps")
+                            }
                         }.frame(height: 20)
                         Text("\(position.isLong ? "Long" : "Short") \(position.leverage)x")
                             .font(DesignTokens.caption).foregroundStyle(DesignTokens.secondary)

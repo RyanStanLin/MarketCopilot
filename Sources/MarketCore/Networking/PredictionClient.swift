@@ -4,8 +4,9 @@ public struct PredictionClient: Sendable {
     private let http: HTTPClient
     private let configuration: APIConfiguration
 
-    public init(configuration: APIConfiguration, http: HTTPClient = HTTPClient()) {
-        self.configuration = configuration; self.http = http
+    public init(configuration: APIConfiguration, http: HTTPClient? = nil) {
+        self.configuration = configuration
+        self.http = http ?? HTTPClient(transport: URLSessionTransport(timeout: configuration.requestTimeout))
     }
 
     public func snapshot(account: AccountConfiguration, credentials: PredictionCredentials?) async throws -> PredictionSnapshot {

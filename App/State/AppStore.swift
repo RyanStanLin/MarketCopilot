@@ -10,6 +10,7 @@ final class AppStore {
     var quotes: [Int: MarketQuote] = [:]
     var accountName = "Connect account"
     var avatarURL: URL?
+    var perpsWebsiteURL = (try? APIConfiguration.bundled())?.perpsWebsite
     var isMenuOpen = false
     var isPerpsExpanded = false
     var maximumMenuHeight: CGFloat = 760
@@ -34,9 +35,14 @@ final class AppStore {
     @ObservationIgnored var activeSecrets = AccountSecrets()
 
     init(designPreview: Bool = false) {
+        #if DEBUG
         isDesignPreview = designPreview
         if designPreview { DesignFixture.populate(self) }
         else { loadWorkspace() }
+        #else
+        isDesignPreview = false
+        loadWorkspace()
+        #endif
     }
 
     var positions: [PerpPosition] { snapshot.perps?.positions ?? [] }

@@ -15,7 +15,8 @@ enum DesignRenderer {
                 NSApp.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
                 for expanded in [false, true] {
                     store.isPerpsExpanded = expanded
-                    let renderer = ImageRenderer(content: PortfolioMenu(store: store, staticRender: true)
+                    let renderer = ImageRenderer(content: PortfolioMenu(store: store,
+                        staticBackdrop: dark ? Color(nsColor: .windowBackgroundColor) : Color(white: 0.84))
                         .environment(\.colorScheme, dark ? .dark : .light)
                         .padding(.horizontal, 48).padding(.top, 40).padding(.bottom, 56)
                         .background(dark ? Color(white: 0.12) : Color(white: 0.82)))

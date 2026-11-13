@@ -1,3 +1,4 @@
+#if DEBUG
 import MarketCore
 import Foundation
 
@@ -24,3 +25,4 @@ enum DesignFixture {
         store.perpsStatus = store.predictionStatus
     }
 }
+#endif

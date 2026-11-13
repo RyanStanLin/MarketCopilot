@@ -12,6 +12,10 @@ struct MarketCopilotApp: App {
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…", action: delegate.showSettings).keyboardShortcut(",")
             }
+            CommandGroup(after: .appSettings) {
+                Button("Show Portfolio", action: delegate.showPortfolio)
+                    .keyboardShortcut("p", modifiers: [.command, .shift])
+            }
         }
     }
 }

@@ -1,0 +1,33 @@
+# Validation
+
+## Reproducible checks
+
+- `swift test`: Swift Testing suites with injected HTTP and socket transports. No live credentials, database files or external services in unit tests.
+- `swift run market-probe`: real CLOB server time, Prediction v2 public decoding, Perps instrument/mark/bid/ask reads and public WebSocket ticker.
+- `zsh Scripts/validate.sh`: Debug app build, isolated Keychain service, in-memory SwiftData, exact design geometry and light/dark component renders.
+- `zsh Scripts/build.sh Release`: locally signed production app, with sample data mode disabled.
+
+## Requirement evidence
+
+| Requirement | Evidence |
+|---|---|
+| Totals include cash once and preserve unavailable values | `totalsIncludePredictionCashWithoutDoubleCountingPerpsCash`, `missingProductDoesNotBecomeZeroInTotals`, `confirmedEmptyAccountsAreValidZeroBalances` |
+| Exact money, percentage and Funding representation | `exactStringAndNumberAmountsNeverPassThroughDouble`, `malformedAndUnavailableAmountsAreRejected`, `formattingPreservesSignedMoneyAndFundingPrecision` |
+| Official CLOB signing and cash units | `signsCanonicalPathWithUrlSafeHmacAndPreservesPadding`, `cashUsesSignerHeadersWalletTypeAndSixDecimalUnits` |
+| Complete Prediction positions and v2 envelope | `walksAllPositionCursorsKeepingWalletAnchorAndDeduplicatingTokens`, `rejectsRepeatingCursorsInsteadOfReturningPartialHoldings`, `decodesPortfolioNumbersAsDecimalAndMissingCashStaysUnavailable` |
+| Full Perps position mapping, both directions, empty holdings | `decodesShortPositionsAndAuthoritativeEquityWithoutAddingNotional`, `zeroSizeIsRemovedAndUnliquidatableLongHasNoInventedPrice`, `missingPrivateFieldsAreErrorsInsteadOfInventedZeroes` |
+| Perps credential acceptance, owner mismatch and expiry | `acceptsMatchingOwnerAndUnexpiredProxy`, `validatesOwnerAndRejectsExpiredProxies` |
+| Dynamic display labels, precision, light/dark logos, bid/ask | `metadataUsesDisplaySymbolPrecisionAndLightDarkLogos`, `quoteReadsSeparateMarkFromBidAndAsk` |
+| WebSocket wire formats, ordered authentication and heartbeat | `tickerAndBookFramesPreserveDistinctPricesAndRejectOldSequences`, `portfolioPushUsesTheSameAuthoritativeFieldsAsRest`, `subscriptionsAuthenticateBeforeSubscribingAndUseOfficialHeartbeat`, `rejectedAuthenticationNeverSendsPrivateSubscriptions` |
+| No stale account responses or duplicated requests | `accountSwitchDiscardsOldInFlightResponses`, `simultaneousRefreshRequestsShareOneInFlightRead` |
+| Cache preservation, rate limits, reconnect bounds | `authFailureRetainsCacheAndStopsAutomaticRetries`, `retryAfterBlocksEvenForcedRefreshUntilItsBoundary`, `rateLimitPreservesRetryAfterWithoutExposingResponseSecrets`, `retryBackoffIsBoundedAndHonorsServerDelay` |
+| Polling choice and silent-stream fallback | `pollingModeCreatesNoWebSocketSubscriptions`, `quietPortfolioStreamFallsBackToPollingAfterFifteenSeconds` |
+| Quote merge and stale update protection | `olderRestSnapshotsCannotReplaceNewerPushAndQuoteUpdatesMerge`, `emptyOrderBookClearsOldBidAskWithoutDiscardingMark` |
+| Account and interval validation | `validatesAddressesWithoutConfusingSignerAndAccount`, `rejectsPartialCredentialSetsButAllowsPublicAddressSetup`, `refreshIntervalsEnforceFiniteBoundaries` |
+| Figma geometry, assets, real native storage | Native checks `collapsedGeometry`, `expandedGeometry`, `drawerClampsToScreen`, `staticAssetsPresent`, `swiftDataAccount`, `swiftDataSettings`, `swiftDataExactDecimalCache`, `swiftDataAccountIsolation`, `keychainRoundTrip`, `keychainIdentityIsolation`, `keychainDelete` |
+
+## Visual verification limits
+
+The component render uses the exact local Figma avatar/US100/NVDA assets, typography and spacing. Native material is deliberately replaced by a neutral static surface for ImageRenderer, since ImageRenderer cannot composite an AppKit glass view or capture the desktop backdrop. These images verify component layout and assets; they are not represented as live screenshots or proof of final material pixels.
+
+The desktop capture tool returned ScreenCaptureKit error `-3811` on both attempts. A visible-desktop pixel overlay, actual mouse/keyboard interaction, multi-monitor behavior and physical sleep/wake therefore remain manual checks. Private authenticated account validation also remains pending until the user enters their own credentials in the app.

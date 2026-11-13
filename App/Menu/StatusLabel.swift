@@ -16,6 +16,8 @@ struct StatusLabel: View {
         .fixedSize().scaleEffect(scale)
         .frame(height: availableHeight)
         .opacity(store.isMenuOpen ? 0.78 : 1)
+        .scaleEffect(store.isMenuOpen && !reduceMotion ? 0.97 : 1)
+        .animation(reduceMotion ? nil : DesignTokens.pressAnimation, value: store.isMenuOpen)
         .animation(DesignTokens.numberAnimation, value: store.statusPortfolio)
         .animation(DesignTokens.numberAnimation, value: store.statusCash)
         .help(store.statusDescription)

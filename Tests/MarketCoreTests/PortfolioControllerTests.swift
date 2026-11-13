@@ -81,6 +81,46 @@ struct PortfolioControllerTests {
         #expect(controller.quoteCache[2]?.bid == 9)
         #expect(controller.quoteCache[2]?.ask == 11)
     }
+
+    @Test func quietPortfolioStreamFallsBackToPollingAfterFifteenSeconds() async throws {
+        let source = ControllerSource()
+        let clock = AdjustableClock()
+        let controller = PortfolioController(configuration: try .bundled(), source: source, clock: clock, automaticallySchedulesUpdates: false)
+        var secrets = AccountSecrets()
+        secrets.perpsProxy = Self.oldWallet; secrets.perpsSecret = "fixture"
+        controller.start(account: account(Self.newWallet), secrets: secrets, settings: RefreshSettings())
+        await controller.refresh()
+        controller.healthySockets.insert("perps"); controller.lastPerpsPush = clock.now
+        clock.advance(5); await controller.refresh(force: false)
+        #expect(await source.perpsCalls == 1)
+        clock.advance(11); await controller.refresh(force: false)
+        #expect(await source.perpsCalls == 2)
+        controller.stop()
+    }
+
+    @Test func emptyOrderBookClearsOldBidAskWithoutDiscardingMark() throws {
+        let controller = PortfolioController(configuration: try .bundled(), source: ControllerSource(), automaticallySchedulesUpdates: false)
+        controller.mergeQuotes([2: MarketQuote(mark: 10, bid: 9, ask: 11, timestamp: Date(timeIntervalSince1970: 100))])
+        controller.mergeQuotes([2: MarketQuote(timestamp: Date(timeIntervalSince1970: 101))])
+        #expect(controller.quoteCache[2]?.mark == 10)
+        #expect(controller.quoteCache[2]?.bid == nil)
+        #expect(controller.quoteCache[2]?.ask == nil)
+    }
+
+    @Test func pollingModeCreatesNoWebSocketSubscriptions() throws {
+        let controller = PortfolioController(configuration: try .bundled(), source: ControllerSource())
+        var settings = RefreshSettings(); settings.predictionMode = .polling; settings.perpsMode = .polling
+        var secrets = AccountSecrets(); secrets.perpsProxy = Self.oldWallet; secrets.perpsSecret = "fixture"
+        let cached = PortfolioSnapshot(predictions: PredictionSnapshot(holdingsValue: 1, cash: 1,
+            positions: [PredictionPosition(tokenID: "first", conditionID: "condition")]))
+        controller.start(account: account(Self.newWallet), secrets: secrets, settings: settings, cached: cached)
+        controller.pollTask?.cancel(); controller.pollTask = nil
+        controller.perpsValidated = true
+        controller.configureSockets()
+        #expect(controller.socketTasks.isEmpty)
+        #expect(controller.healthySockets.isEmpty)
+        controller.stop()
+    }
 }
 
 final class AdjustableClock: SessionClock, @unchecked Sendable {

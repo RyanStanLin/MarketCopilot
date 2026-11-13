@@ -22,10 +22,12 @@ struct PredictionClientTests {
         var account = AccountConfiguration()
         account.walletAddress = "0x1111111111111111111111111111111111111111"
         account.signerAddress = "0x2222222222222222222222222222222222222222"
-        let cash = try await client.cash(account: account, credentials: PredictionCredentials(apiKey: "fixture", secret: "dGVzdC1zZWNyZXQ=", passphrase: "fixture"))
+        let cash = try await client.cash(account: account, credentials: PredictionCredentials(apiKey: "fixture-key", secret: "dGVzdC1zZWNyZXQ=", passphrase: "fixture-passphrase"))
         #expect(cash == Decimal(string: "2.98"))
         let request = try #require(await transport.requests.last)
         #expect(request.value(forHTTPHeaderField: "POLY_ADDRESS") == account.signerAddress)
+        #expect(request.value(forHTTPHeaderField: "POLY_API_KEY") == "fixture-key")
+        #expect(request.value(forHTTPHeaderField: "POLY_PASSPHRASE") == "fixture-passphrase")
         #expect(request.value(forHTTPHeaderField: "POLY_SIGNATURE") == "7sNNKh8J45Qt3mybPDV2Wal05yNQuc0jn4exnFlxjm8=")
         #expect(request.url?.query()?.contains("signature_type=3") == true)
         #expect(request.httpMethod == "GET")

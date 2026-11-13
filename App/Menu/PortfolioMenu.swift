@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PortfolioMenu: View {
     let store: AppStore
-    var staticRender = false
+    var staticBackdrop: Color?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -16,7 +16,7 @@ struct PortfolioMenu: View {
         }
         .frame(width: DesignTokens.menuWidth, height: store.menuHeight, alignment: .top)
         .background {
-            if staticRender { Color(nsColor: .windowBackgroundColor) } else { GlassSurface() }
+            if let staticBackdrop { staticBackdrop } else { GlassSurface() }
         }
         .clipShape(.rect(cornerRadius: DesignTokens.cornerRadius))
         .opacity(store.isMenuOpen ? 1 : 0)

@@ -3,6 +3,7 @@ import Foundation
 
 actor ControllerSource: PortfolioDataSource {
     var predictionCalls: [String] = []
+    var perpsCalls = 0
     private let heldWallet: String?
     private var continuations: [CheckedContinuation<PredictionSnapshot, any Error>] = []
     private var waiters: [CheckedContinuation<Void, Never>] = []
@@ -27,7 +28,10 @@ actor ControllerSource: PortfolioDataSource {
         for continuation in continuations { continuation.resume(returning: PredictionSnapshot(holdingsValue: 999, cash: 1)) }
         continuations = []
     }
-    func perps(credentials: PerpsCredentials) -> PerpsSnapshot { PerpsSnapshot(portfolio: 5, cash: 1, positions: []) }
+    func perps(credentials: PerpsCredentials) -> PerpsSnapshot {
+        perpsCalls += 1
+        return PerpsSnapshot(portfolio: 5, cash: 1, positions: [])
+    }
     func validatePerps(credentials: PerpsCredentials, expectedOwner: String?, now: Date) {}
     func instruments() -> [Int: Instrument] { [:] }
     func quotes(instrumentIDs: Set<Int>) -> [Int: MarketQuote] { [:] }

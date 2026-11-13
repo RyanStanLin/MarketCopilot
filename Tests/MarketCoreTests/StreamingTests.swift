@@ -56,9 +56,10 @@ struct StreamingTests {
         let subscription = try SocketSubscription.perps(configuration: .bundled(), credentials: .init(proxy: "fixture", secret: "fixture"), instrumentIDs: [])
         let state = SocketObservations()
         let pump = SocketPump(factory: RecordedSocketFactory(socket: socket), clock: SystemSessionClock())
-        await #expect(throws: APIError.self) {
+        let rejection = try await #require(throws: APIError.self) {
             try await pump.run(subscription, ready: { await state.connected() }, message: { await state.record($0) })
         }
+        #expect(rejection.status == 401)
         #expect(await socket.sent.count == 1)
         #expect(await state.isConnected == false)
         #expect(await socket.closed)
@@ -69,6 +70,22 @@ struct StreamingTests {
         #expect(RetryPolicy.delay(attempt: 2) == 4)
         #expect(RetryPolicy.delay(attempt: 100) == 30)
         #expect(RetryPolicy.delay(attempt: 0, retryAfter: 60) == 60)
+    }
+
+    @Test func predictionSubscriptionsKeepPublicAssetsAndPrivateCredentialFieldsDistinct() throws {
+        let configuration = try APIConfiguration.bundled()
+        let publicStream = try SocketSubscription.predictionMarket(configuration: configuration, assetIDs: ["b", "a"])
+        let publicJSON = try JSONSerialization.jsonObject(with: Data(publicStream.subscription.utf8)) as? [String: Any]
+        #expect(publicJSON?["assets_ids"] as? [String] == ["a", "b"])
+        #expect(publicJSON?["type"] as? String == "market")
+        #expect(publicJSON?["auth"] == nil)
+        let credentials = PredictionCredentials(apiKey: "key-fixture", secret: "secret-fixture", passphrase: "phrase-fixture")
+        let userStream = try SocketSubscription.predictionUser(configuration: configuration, credentials: credentials, conditionIDs: [])
+        let privateJSON = try JSONSerialization.jsonObject(with: Data(userStream.subscription.utf8)) as? [String: Any]
+        let auth = try #require(privateJSON?["auth"] as? [String: String])
+        #expect(auth == ["apiKey": "key-fixture", "secret": "secret-fixture", "passphrase": "phrase-fixture"])
+        #expect(privateJSON?["type"] as? String == "user")
+        #expect(userStream.heartbeat == "PING")
     }
 }
 

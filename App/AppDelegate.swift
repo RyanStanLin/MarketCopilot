@@ -50,6 +50,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         coordinator = AppCoordinator(store: store)
         coordinator?.start()
+        if CommandLine.arguments.contains("--settings") {
+            DispatchQueue.main.async { [weak self] in self?.showSettings() }
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) { coordinator?.stop() }
@@ -87,6 +90,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         NSApp.activate()
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    func showPortfolio() {
+        if !store.isMenuOpen { toggleMenu() }
     }
 
     private func closeMenu() {
@@ -148,7 +155,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self] event in
             guard let self else { return event }
-            if event.type == .keyDown && event.keyCode == 53 { self.closeMenu(); return nil }
+            if event.type == .keyDown && event.keyCode == 53 && self.store.isMenuOpen { self.closeMenu(); return nil }
             if event.type != .keyDown, event.window !== self.panel, event.window !== self.statusItem?.button?.window {
                 self.closeMenu()
             }

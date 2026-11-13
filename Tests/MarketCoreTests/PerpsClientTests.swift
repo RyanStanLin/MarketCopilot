@@ -13,6 +13,10 @@ struct PerpsClientTests {
         #expect(result.portfolio == Decimal(string: "17.72"))
         #expect(result.cash == Decimal(string: "0.02"))
         let position = try #require(result.positions.first)
+        #expect(position.id == 2)
+        #expect(position.symbol == "US100-USD")
+        #expect(position.size == Decimal(string: "-0.01"))
+        #expect(position.entryPrice == 27_951)
         #expect(!position.isLong)
         #expect(position.leverage == 24)
         #expect(position.margin == Decimal(string: "18.20"))
@@ -20,6 +24,7 @@ struct PerpsClientTests {
         #expect(position.liquidationPrice == 30_000)
         #expect(position.cumulativeFunding == Decimal(string: "-0.0372"))
         #expect(position.returnOnEquity == Decimal(string: "-0.205"))
+        #expect(position.unrealizedPnl == Decimal(string: "-3.70"))
         let request = try #require(await transport.requests.first)
         #expect(request.value(forHTTPHeaderField: "POLYMARKET-PROXY") == "fixture-proxy")
         #expect(request.value(forHTTPHeaderField: "POLYMARKET-SECRET") == "fixture-secret")
@@ -41,6 +46,27 @@ struct PerpsClientTests {
         await #expect(throws: APIError.self) {
             try await client.validate(credentials: .init(proxy: "proxy", secret: "fixture"), expectedOwner: "owner", now: Date(timeIntervalSince1970: 1_800_000_000))
         }
+    }
+
+    @Test func acceptsMatchingOwnerAndUnexpiredProxy() async throws {
+        let body = #"{"address":"0xOwner","keys":[{"proxy":"0xProxy","expiry":1800000000000}]}"#
+        let transport = StubHTTPTransport(["/v1/account/credentials": [.init(body: body)]])
+        let client = PerpsClient(configuration: try .bundled(), http: HTTPClient(transport: transport))
+        let owner = try await client.validate(credentials: .init(proxy: "0xproxy", secret: "fixture"), expectedOwner: "0xowner", now: Date(timeIntervalSince1970: 1_700_000_000))
+        #expect(owner == "0xOwner")
+    }
+
+    @Test func zeroSizeIsRemovedAndUnliquidatableLongHasNoInventedPrice() async throws {
+        let zero = Self.portfolio.replacingOccurrences(of: #""size":"-0.01""#, with: #""size":"0""#)
+        let long = Self.portfolio.replacingOccurrences(of: #""size":"-0.01""#, with: #""size":"0.01""#)
+            .replacingOccurrences(of: #""liquidation_price":"30000""#, with: #""liquidation_price":"0""#)
+        let transport = StubHTTPTransport(["/v1/account/portfolio": [.init(body: zero), .init(body: long)]])
+        let client = PerpsClient(configuration: try .bundled(), http: HTTPClient(transport: transport))
+        let empty = try await client.snapshot(credentials: .init(proxy: "fixture", secret: "fixture"))
+        #expect(empty.positions.isEmpty)
+        let snapshot = try await client.snapshot(credentials: .init(proxy: "fixture", secret: "fixture"))
+        #expect(snapshot.positions.first?.isLong == true)
+        #expect(snapshot.positions.first?.liquidationPrice == nil)
     }
 
     @Test func metadataUsesDisplaySymbolPrecisionAndLightDarkLogos() async throws {

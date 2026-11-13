@@ -3,7 +3,7 @@ import Foundation
 public struct PolymarketDataSource: PortfolioDataSource {
     private let predictionClient: PredictionClient
     private let perpsClient: PerpsClient
-    public init(configuration: APIConfiguration, http: HTTPClient = HTTPClient()) {
+    public init(configuration: APIConfiguration, http: HTTPClient? = nil) {
         predictionClient = PredictionClient(configuration: configuration, http: http)
         perpsClient = PerpsClient(configuration: configuration, http: http)
     }
