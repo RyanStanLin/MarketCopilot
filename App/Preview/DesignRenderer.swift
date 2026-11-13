@@ -22,7 +22,9 @@ enum DesignRenderer {
                         .padding(.horizontal, 48).padding(.top, 40).padding(.bottom, 56)
                         .background(dark ? Color(white: 0.12) : Color(white: 0.82)))
                     renderer.scale = 2
-                    guard let image = renderer.cgImage else { continue }
+                    var rendered: CGImage?
+                    NSApp.effectiveAppearance.performAsCurrentDrawingAppearance { rendered = renderer.cgImage }
+                    guard let image = rendered else { continue }
                     let rep = NSBitmapImageRep(cgImage: image)
                     let name = "\(expanded ? "expanded" : "collapsed")-\(dark ? "dark" : "light").png"
                     try rep.representation(using: .png, properties: [:])?.write(to: directory.appending(path: name))

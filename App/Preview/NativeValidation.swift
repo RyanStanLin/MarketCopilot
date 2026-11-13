@@ -12,6 +12,12 @@ enum NativeValidation {
         checks["expandedGeometry"] = DesignTokens.menuHeight(expanded: true, positionCount: 2, maximum: 760) == 662
         checks["drawerClampsToScreen"] = DesignTokens.menuHeight(expanded: true, positionCount: 20, maximum: 700) == 700
         checks["staticAssetsPresent"] = ["FigmaAvatar", "FigmaUS100", "FigmaNVDA"].allSatisfy { NSImage(named: $0) != nil }
+        checks["followsSystemAppearance"] = NSApp.appearance == nil
+        let lightFill = resolveFill(.aqua)
+        let darkFill = resolveFill(.darkAqua)
+        print("Appearance fill components: light=\(String(describing: lightFill)), dark=\(String(describing: darkFill))")
+        checks["fillColorsAdaptToAppearance"] = lightFill.map { $0.0 < 0.01 && abs($0.1 - 0.05) < 0.01 } == true
+            && darkFill.map { $0.0 > 0.99 && abs($0.1 - 0.1) < 0.01 } == true
         do {
             let repository = try WorkspaceRepository(inMemory: true)
             var account = AccountConfiguration()
@@ -50,6 +56,17 @@ enum NativeValidation {
         } catch { errors.append(error.localizedDescription) }
         if !errors.isEmpty || !checks.values.allSatisfy({ $0 }) { exit(1) }
         NSApp.terminate(nil)
+    }
+
+    private static func resolveFill(_ name: NSAppearance.Name) -> (CGFloat, CGFloat)? {
+        guard let appearance = NSAppearance(named: name) else { return nil }
+        var result: (CGFloat, CGFloat)?
+        appearance.performAsCurrentDrawingAppearance {
+            if let color = NSColor(named: "FillsOpaqueTertiary")?.usingColorSpace(.deviceRGB) {
+                result = (color.redComponent, color.alphaComponent)
+            }
+        }
+        return result
     }
 }
 #endif
