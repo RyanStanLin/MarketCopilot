@@ -3,7 +3,8 @@ import MarketCore
 import Security
 
 struct KeychainVault {
-    private let service = "in.ryanl.MarketCopilot.account"
+    private let service: String
+    init(service: String = "in.ryanl.MarketCopilot.account") { self.service = service }
 
     func load(identity: String) throws -> AccountSecrets {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,

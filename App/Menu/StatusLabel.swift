@@ -4,6 +4,7 @@ import SwiftUI
 struct StatusLabel: View {
     let store: AppStore
     let availableHeight: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var scale: CGFloat { min(1, availableHeight / DesignTokens.statusHeight) }
 
     var body: some View {
@@ -19,5 +20,6 @@ struct StatusLabel: View {
         .animation(DesignTokens.numberAnimation, value: store.statusCash)
         .help(store.statusDescription)
         .accessibilityElement(children: .combine)
+        .transaction { if reduceMotion { $0.disablesAnimations = true } }
     }
 }

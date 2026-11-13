@@ -22,5 +22,6 @@ struct PortfolioMenu: View {
         .opacity(store.isMenuOpen ? 1 : 0)
         .scaleEffect(store.isMenuOpen || reduceMotion ? 1 : 0.975, anchor: .top)
         .accessibilityIdentifier("portfolioMenu")
+        .transaction { if reduceMotion { $0.disablesAnimations = true } }
     }
 }

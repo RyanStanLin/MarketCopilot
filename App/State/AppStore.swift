@@ -31,6 +31,7 @@ final class AppStore {
     @ObservationIgnored var drawerChanged: () -> Void = {}
     @ObservationIgnored var settingsApplied: () -> Void = {}
     @ObservationIgnored var repository: WorkspaceRepository?
+    @ObservationIgnored var activeSecrets = AccountSecrets()
 
     init(designPreview: Bool = false) {
         isDesignPreview = designPreview

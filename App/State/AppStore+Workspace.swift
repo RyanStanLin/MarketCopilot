@@ -13,6 +13,7 @@ extension AppStore {
             self.instruments = instruments
             if account.isConfigured {
                 secretsDraft = try KeychainVault().load(identity: account.identity)
+                activeSecrets = secretsDraft
                 accountName = String(account.walletAddress.prefix(6)) + "…" + account.walletAddress.suffix(4)
             }
             if let cached {
@@ -42,7 +43,7 @@ extension AppStore {
             }
             let loginChanged = refreshSettings.launchAtLogin != settings.launchAtLogin
             self.account = account; accountDraft = account
-            refreshSettings = settings; refreshDraft = settings; secretsDraft = secrets
+            refreshSettings = settings; refreshDraft = settings; secretsDraft = secrets; activeSecrets = secrets
             accountName = String(account.walletAddress.prefix(6)) + "…" + account.walletAddress.suffix(4)
             settingsNotice = "Saved. Connecting to Polymarket…"
             if loginChanged {
@@ -66,7 +67,7 @@ extension AppStore {
         do {
             try KeychainVault().clear(identity: account.identity)
             account = AccountConfiguration(); accountDraft = account
-            secretsDraft = AccountSecrets(); snapshot = PortfolioSnapshot(); quotes = [:]
+            secretsDraft = AccountSecrets(); activeSecrets = AccountSecrets(); snapshot = PortfolioSnapshot(); quotes = [:]
             accountName = "Connect account"; avatarURL = nil
             predictionStatus = "Connect your account in Settings."
             perpsStatus = predictionStatus

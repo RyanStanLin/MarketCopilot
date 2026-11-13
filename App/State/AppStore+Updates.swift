@@ -1,0 +1,26 @@
+import Foundation
+import MarketCore
+
+extension AppStore {
+    func apply(_ update: PortfolioUpdate) {
+        switch update {
+        case .predictions(let value): snapshot.predictions = value
+        case .perps(let value):
+            let oldCount = positions.count
+            snapshot.perps = value
+            if oldCount != positions.count { layoutChanged() }
+        case .quotes(let values): quotes = values
+        case .instruments(let values): instruments = values
+        case .profile(let value):
+            if let name = value.name, !name.isEmpty { accountName = name }
+            avatarURL = value.avatar
+        case .status(let product, let text):
+            if product == .predictions { predictionStatus = text } else { perpsStatus = text }
+        case .busy(let busy):
+            isRefreshing = busy; isConnecting = busy
+            if !busy && account.isConfigured {
+                settingsNotice = "Predictions: " + predictionStatus + "\nPerps: " + perpsStatus
+            }
+        }
+    }
+}

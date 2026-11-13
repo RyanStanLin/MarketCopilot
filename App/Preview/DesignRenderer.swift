@@ -12,6 +12,7 @@ enum DesignRenderer {
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             for dark in [false, true] {
+                NSApp.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
                 for expanded in [false, true] {
                     store.isPerpsExpanded = expanded
                     let renderer = ImageRenderer(content: PortfolioMenu(store: store, staticRender: true)

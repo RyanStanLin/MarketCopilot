@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var clickMonitor: Any?
     private var localMonitor: Any?
     private var settingsWindow: NSWindow?
+    private var coordinator: AppCoordinator?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -28,6 +29,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if CommandLine.arguments.contains("--dark") { NSApp.appearance = NSAppearance(named: .darkAqua) }
         if CommandLine.arguments.contains("--light") { NSApp.appearance = NSAppearance(named: .aqua) }
         #if DEBUG
+        if CommandLine.arguments.contains("--validate-native") && store.isDesignPreview {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                NativeValidation.run(self.store)
+            }
+            return
+        }
         if CommandLine.arguments.contains("--render-design") && store.isDesignPreview {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -40,7 +48,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             store.isPerpsExpanded = CommandLine.arguments.contains("--expanded")
             DispatchQueue.main.async { [weak self] in self?.toggleMenu() }
         }
+        coordinator = AppCoordinator(store: store)
+        coordinator?.start()
     }
+
+    func applicationWillTerminate(_ notification: Notification) { coordinator?.stop() }
 
     @objc private func toggleMenu() {
         guard let button = statusItem?.button, let window = button.window else { return }
@@ -58,7 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel = menu
         resizeMenu(animated: false)
         menu.makeKeyAndOrderFront(nil)
-        withAnimation(.spring(response: 0.26, dampingFraction: 0.9)) { store.isMenuOpen = true }
+        withAnimation(NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : .spring(response: 0.26, dampingFraction: 0.9)) { store.isMenuOpen = true }
         store.refreshRequested()
     }
 
@@ -79,7 +91,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func closeMenu() {
         guard store.isMenuOpen else { return }
-        withAnimation(.easeInOut(duration: 0.16)) { store.isMenuOpen = false } completion: { [weak self] in
+        withAnimation(NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : .easeInOut(duration: 0.16)) { store.isMenuOpen = false } completion: { [weak self] in
             guard let self, !self.store.isMenuOpen else { return }
             self.panel?.orderOut(nil)
         }
