@@ -6,14 +6,16 @@ struct RemoteImage: View {
     var fixtureName: String?
     var fallbackSymbol = "photo"
     var size: CGFloat = DesignTokens.iconSize
-    @State private var loaded: NSImage?
+    @State private var loaded: CGImage?
+    @Environment(\.displayScale) private var displayScale
+    private var loadID: String { "\(url?.absoluteString ?? "")|\(size)|\(displayScale)" }
 
     var body: some View {
         Group {
             if let fixtureName {
                 Image(fixtureName).resizable()
             } else if let loaded {
-                Image(nsImage: loaded).resizable()
+                Image(decorative: loaded, scale: displayScale).resizable()
             } else {
                 Image(systemName: fallbackSymbol).resizable().scaledToFit()
                     .foregroundStyle(DesignTokens.tertiary).padding(4)
@@ -22,7 +24,7 @@ struct RemoteImage: View {
         .frame(width: size, height: size)
         .clipped()
         .fixedSize()
-        .task(id: url, load)
+        .task(id: loadID, load)
         .accessibilityHidden(true)
     }
 
@@ -33,7 +35,7 @@ struct RemoteImage: View {
             let (data, response) = try await URLSession.shared.data(from: url)
             guard !Task.isCancelled, (response as? HTTPURLResponse)?.statusCode == 200,
                   data.count <= 5_000_000 else { return }
-            loaded = NSImage(data: data)
+            loaded = IconImageDecoder.decode(data, pointSize: size, displayScale: displayScale)
         } catch { /* Keep the semantic placeholder when an optional image is unavailable. */ }
     }
 }

@@ -5,7 +5,7 @@ Source nodes: menu `2:4070`; head icons `1:3545`.
 - Menu: 308 pt wide, 16 pt radius, 14 pt horizontal insets.
 - Collapsed: 327 pt. Expanded with two positions: 662 pt.
 - Position: 141 pt; metric groups indented 40 pt; row spacing 10 pt; metric spacing 12 pt.
-- Drawer: full-width top and bottom borders, semantic translucent fill; replaces the collapsed inset separator.
+- Drawer: full-width top and bottom borders, system `.fill.quaternary` background; replaces the collapsed inset separator.
 - Drawer motion: one spring progress controls the clipped drawer height, inset separator and Cash position. Contents remain fully laid out below the 159 pt parent section. The AppKit window follows the rendered height without its own animation and keeps its top-left anchor fixed, including when an animation is reversed.
 - Every menu option has the updated Figma hover background. The Perps disclosure rotates right/down, and its icon is accent blue only while expanded.
 - SF Pro 13 pt bold headings, SF Pro Rounded 15 pt amounts, SF Pro 12 pt captions.
@@ -17,3 +17,5 @@ Apple library Code Connect entries describe macOS menu separators and menu actio
 
 Dark appearance uses native label/material colors and appearance variants for the Figma fill tokens. Financial signs and text remain in the source design's colors; no unsolicited red/green styling is added.
 The application follows system appearance changes in real time; no runtime light/dark override is applied.
+
+The title arrow represents the sign of the official position's unrealized PnL. It updates with the account stream and switches between `arrow.up.right.circle.fill` and `arrow.down.right.circle.fill`; it does not compare prices. English, Simplified Chinese and Traditional Chinese use localized string resources while retaining the same menu geometry.
