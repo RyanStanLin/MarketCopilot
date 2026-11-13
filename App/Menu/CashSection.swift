@@ -9,10 +9,10 @@ struct CashSection: View {
             SectionHeading(title: "Cash")
             VStack(spacing: DesignTokens.rowGap) {
                 SummaryRow(title: "Predictions", amount: store.snapshot.predictions?.cash,
-                           symbol: "loupe", helpText: store.predictionStatus)
+                           symbol: "loupe", helpText: store.predictionStatus, hoverID: "cashPredictions")
                 SummaryRow(title: "Perps", amount: store.snapshot.perps?.cash,
                            symbol: "arrow.forward.circle.dotted",
-                           helpText: "Available order margin\n" + store.perpsStatus)
+                           helpText: "Available order margin\n" + store.perpsStatus, hoverID: "cashPerps")
             }.padding(.vertical, 6)
             MenuSeparator()
             Button(action: store.openSettings) {
@@ -20,6 +20,7 @@ struct CashSection: View {
                     .frame(maxWidth: .infinity, alignment: .leading).frame(height: 22)
             }
             .buttonStyle(PressButtonStyle())
+            .menuHover(.action, id: "settings")
             .accessibilityIdentifier("openSettings")
         }
         .padding(.horizontal, DesignTokens.inset).padding(.bottom, 8)

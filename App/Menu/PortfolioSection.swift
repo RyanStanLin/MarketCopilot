@@ -10,11 +10,12 @@ struct PortfolioSection: View {
             SectionHeading(title: "Portfolio")
             VStack(spacing: DesignTokens.rowGap) {
                 SummaryRow(title: "Predictions", amount: store.snapshot.predictions?.portfolio,
-                           symbol: "loupe", helpText: store.predictionStatus)
+                           symbol: "loupe", helpText: store.predictionStatus, hoverID: "portfolioPredictions")
                 Button(action: store.toggleDrawer) {
                     SummaryRow(title: "Perps", amount: store.snapshot.perps?.portfolio,
-                               symbol: "arrow.forward.circle.dotted", highlighted: true,
-                               foldable: true, helpText: store.perpsStatus)
+                               symbol: "arrow.forward.circle.dotted", highlighted: store.isPerpsExpanded,
+                               foldable: true, expanded: store.isPerpsExpanded,
+                               helpText: store.perpsStatus, hoverID: "portfolioPerps")
                 }
                 .buttonStyle(PressButtonStyle())
                 .accessibilityLabel("Perps positions")

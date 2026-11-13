@@ -18,6 +18,7 @@ struct MenuHeader: View {
                 }
             }
             .buttonStyle(PressButtonStyle())
+            .menuHover(.profile, id: "account")
             .help("Account settings")
             .accessibilityIdentifier("accountSettings")
         }

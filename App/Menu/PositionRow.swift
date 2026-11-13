@@ -30,7 +30,9 @@ struct PositionRow: View {
                                 Link(destination: destination) {
                                     Image(systemName: "arrow.up.right.circle.fill")
                                         .font(.system(size: 14)).foregroundStyle(DesignTokens.secondary)
-                                }.buttonStyle(PressButtonStyle()).help("Open Polymarket Perps")
+                                }.buttonStyle(PressButtonStyle())
+                                    .menuHover(.icon, id: "position-link-\(position.id)")
+                                    .help("Open Polymarket Perps")
                             }
                         }.frame(height: 20)
                         Text("\(position.isLong ? "Long" : "Short") \(position.leverage)x")
@@ -63,5 +65,6 @@ struct PositionRow: View {
         .animation(DesignTokens.numberAnimation, value: position)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("position-\(position.id)")
+        .menuHover(.position, id: "position-\(position.id)")
     }
 }

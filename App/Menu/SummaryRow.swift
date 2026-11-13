@@ -7,7 +7,9 @@ struct SummaryRow: View {
     let symbol: String
     var highlighted = false
     var foldable = false
+    var expanded = false
     var helpText = ""
+    var hoverID = ""
 
     var body: some View {
         HStack(spacing: 0) {
@@ -22,7 +24,9 @@ struct SummaryRow: View {
             }
             Spacer(minLength: 4)
             if foldable {
-                Image(systemName: "chevron.down").font(.system(size: 11, weight: .bold))
+                Image(systemName: "chevron.right").font(.system(size: 11, weight: .bold))
+                    .rotationEffect(.degrees(expanded ? 90 : 0))
+                    .animation(DesignTokens.drawerAnimation, value: expanded)
                     .frame(width: 12, height: 22).foregroundStyle(DesignTokens.primary)
             }
         }
@@ -31,5 +35,6 @@ struct SummaryRow: View {
         .help(helpText)
         .animation(DesignTokens.numberAnimation, value: amount)
         .accessibilityElement(children: .combine)
+        .menuHover(.summary, id: hoverID)
     }
 }
