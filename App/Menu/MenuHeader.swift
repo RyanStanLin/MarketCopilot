@@ -1,4 +1,5 @@
 import SwiftUI
+import MarketCore
 
 struct MenuHeader: View {
     let store: AppStore
@@ -9,7 +10,8 @@ struct MenuHeader: View {
             Spacer(minLength: 8)
             Button(action: store.openSettings) {
                 HStack(spacing: 8) {
-                    Text(store.accountName).foregroundStyle(DesignTokens.secondary).lineLimit(1)
+                    Text(store.accountName == "Connect account" ? L10n.text("Connect account") : store.accountName)
+                        .foregroundStyle(DesignTokens.secondary).lineLimit(1)
                     RemoteImage(url: store.avatarURL, fixtureName: store.isDesignPreview ? "FigmaAvatar" : nil,
                                 fallbackSymbol: "person.crop.circle.fill", size: DesignTokens.avatarSize)
                         .frame(width: DesignTokens.avatarSize, height: DesignTokens.avatarSize)

@@ -183,6 +183,7 @@
 			<array>
 				<string>en</string>
 				<string>zh-Hans</string>
+				<string>zh-Hant</string>
 				<string>Base</string>
 			</array>
 			<key>mainGroup</key>

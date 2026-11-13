@@ -1,8 +1,9 @@
 import SwiftUI
+import MarketCore
 
 struct PositionMetric: View {
     let value: String
-    let label: String
+    let label: LocalizedStringKey
     var alignment: HorizontalAlignment = .leading
     var helpText = ""
 
@@ -14,7 +15,7 @@ struct PositionMetric: View {
         }
         .foregroundStyle(DesignTokens.secondary)
         .frame(maxWidth: .infinity, alignment: Alignment(horizontal: alignment, vertical: .center))
-        .help(helpText.isEmpty ? value : helpText)
+        .help(helpText.isEmpty ? value : L10n.text(helpText))
         .accessibilityElement(children: .combine)
         .animation(DesignTokens.numberAnimation, value: value)
     }

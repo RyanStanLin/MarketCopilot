@@ -4,7 +4,7 @@ extension PortfolioController {
     func refreshPredictions(token: UUID, force: Bool) async {
         guard let account, mayRefresh(.predictions, force: force, last: lastPredictionREST, interval: settings.pollingInterval) else { return }
         guard AccountConfiguration.isAddress(account.walletAddress) else {
-            onUpdate?(.status(.predictions, "Add a Polymarket wallet or profile in Settings to include Predictions."))
+            onUpdate?(.status(.predictions, L10n.text("Add a Polymarket wallet or profile in Settings to include Predictions.")))
             return
         }
         do {
@@ -14,8 +14,8 @@ extension PortfolioController {
             authenticationBlocked.remove(.predictions); retryNotBefore[.predictions] = nil
             onUpdate?(.predictions(result))
             let transport = healthySockets.contains("predictionMarket") || healthySockets.contains("predictionUser") ? "WebSocket + REST" : "Polling"
-            let text = result.cash == nil ? "Holdings updated · Cash temporarily unavailable; totals include known holdings."
-                : transport + " · Updated " + result.timestamp.formatted(date: .omitted, time: .standard)
+            let text = result.cash == nil ? L10n.text("Holdings updated · Cash temporarily unavailable; totals include known holdings.")
+                : L10n.format("%@ · Updated %@", L10n.text(transport), result.timestamp.formatted(.dateTime.hour().minute().second().locale(L10n.locale)))
             onUpdate?(.status(.predictions, text))
         } catch { failed(error, product: .predictions, token: token) }
     }
@@ -23,7 +23,7 @@ extension PortfolioController {
     func refreshPerps(token: UUID, force: Bool) async {
         guard let account else { return }
         guard let credentials = secrets.perps else {
-            onUpdate?(.status(.perps, "Add Perps proxy credentials to read equity, cash and position details.")); return
+            onUpdate?(.status(.perps, L10n.text("Add Perps proxy credentials to read equity, cash and position details."))); return
         }
         let receivingPushes = healthySockets.contains("perps") && clock.now.timeIntervalSince(lastPerpsPush) <= 15
         let interval = receivingPushes ? settings.reconciliationInterval : settings.pollingInterval
@@ -40,7 +40,7 @@ extension PortfolioController {
             lastPerpsREST = clock.now
             authenticationBlocked.remove(.perps); retryNotBefore[.perps] = nil
             let transport = healthySockets.contains("perps") ? "WebSocket" : "Polling"
-            onUpdate?(.status(.perps, transport + " · Updated " + result.timestamp.formatted(date: .omitted, time: .standard)))
+            onUpdate?(.status(.perps, L10n.format("%@ · Updated %@", L10n.text(transport), result.timestamp.formatted(.dateTime.hour().minute().second().locale(L10n.locale)))))
             if drawerExpanded {
                 let quotes = try await source.quotes(instrumentIDs: Set(result.positions.map(\.id)))
                 guard isCurrent(token) else { return }

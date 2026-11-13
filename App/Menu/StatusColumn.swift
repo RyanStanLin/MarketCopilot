@@ -2,7 +2,7 @@ import SwiftUI
 
 struct StatusColumn: View {
     let value: String
-    let title: String
+    let title: LocalizedStringKey
 
     var body: some View {
         VStack(alignment: .leading, spacing: -3) {

@@ -46,7 +46,7 @@ public final class PortfolioController {
         stop()
         guard account.isConfigured else { return }
         self.account = account; self.secrets = secrets; self.settings = settings; snapshot = cached
-        onUpdate?(.status(.predictions, "Connecting…")); onUpdate?(.status(.perps, "Connecting…"))
+        onUpdate?(.status(.predictions, L10n.text("Connecting…"))); onUpdate?(.status(.perps, L10n.text("Connecting…")))
         guard automaticallySchedulesUpdates else { return }
         let token = generation
         pollTask = Task { [weak self] in
@@ -113,7 +113,7 @@ public final class PortfolioController {
             if let seconds = api.retryAfter { retryNotBefore[product] = clock.now.addingTimeInterval(seconds) }
         }
         let date = product == .predictions ? snapshot.predictions?.timestamp : snapshot.perps?.timestamp
-        let suffix = date.map { " Last valid update: " + $0.formatted(date: .omitted, time: .standard) + "." } ?? ""
+        let suffix = date.map { L10n.format(" Last valid update: %@.", $0.formatted(.dateTime.hour().minute().second().locale(L10n.locale))) } ?? ""
         onUpdate?(.status(product, error.localizedDescription + suffix))
     }
 }

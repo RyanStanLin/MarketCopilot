@@ -39,8 +39,8 @@ public struct HTTPClient: Sendable {
             case 403: message = "Polymarket denied access. Check credentials and network availability."
             case 404: message = "The requested account or resource was not found."
             case 429: message = "Polymarket rate limit reached. Waiting before retrying."
-            case 500...599: message = "Polymarket is temporarily unavailable (HTTP \(response.statusCode))."
-            default: message = "Polymarket rejected the request (HTTP \(response.statusCode)). Check the account configuration."
+            case 500...599: message = L10n.format("Polymarket is temporarily unavailable (HTTP %d).", response.statusCode)
+            default: message = L10n.format("Polymarket rejected the request (HTTP %d). Check the account configuration.", response.statusCode)
             }
             let retry = response.value(forHTTPHeaderField: "Retry-After").flatMap(TimeInterval.init)
             throw APIError(status: response.statusCode, reason: message, retryAfter: retry)

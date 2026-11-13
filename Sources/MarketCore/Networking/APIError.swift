@@ -8,5 +8,5 @@ public struct APIError: LocalizedError, Equatable, Sendable {
         self.status = status; self.reason = reason; self.retryAfter = retryAfter
     }
     public var isAuthenticationFailure: Bool { status == 401 || status == 403 }
-    public var errorDescription: String? { reason }
+    public var errorDescription: String? { L10n.text(reason) }
 }

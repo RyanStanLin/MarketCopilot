@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "MarketCopilot",
+    defaultLocalization: "en",
     platforms: [.macOS("27.0")],
     products: [
         .library(name: "MarketCore", targets: ["MarketCore"]),

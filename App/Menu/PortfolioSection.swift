@@ -1,4 +1,5 @@
 import SwiftUI
+import MarketCore
 
 struct PortfolioSection: View {
     let store: AppStore
@@ -19,7 +20,7 @@ struct PortfolioSection: View {
                 }
                 .buttonStyle(PressButtonStyle())
                 .accessibilityLabel("Perps positions")
-                .accessibilityValue(store.isPerpsExpanded ? "Expanded" : "Collapsed")
+                .accessibilityValue(L10n.text(store.isPerpsExpanded ? "Expanded" : "Collapsed"))
                 .accessibilityIdentifier("togglePerps")
             }
             .padding(.vertical, 6)

@@ -26,7 +26,7 @@ extension PortfolioController {
                                  subscription: try .perpsMarket(configuration: configuration, instrumentIDs: ids))
                 } else { cancelSocket("perpsQuotes") }
             } else { cancelSocket("perps"); cancelSocket("perpsQuotes") }
-        } catch { onUpdate?(.status(.perps, "The streaming subscription could not be prepared.")) }
+        } catch { onUpdate?(.status(.perps, L10n.text("The streaming subscription could not be prepared."))) }
     }
 
     func ensureSocket(_ key: String, signature: String, product: MarketProduct, subscription: SocketSubscription) {
@@ -70,7 +70,7 @@ extension PortfolioController {
     func socketReady(key: String, product: MarketProduct, token: UUID) {
         guard isCurrent(token) else { return }
         healthySockets.insert(key)
-        onUpdate?(.status(product, "WebSocket connected · REST reconciliation active."))
+        onUpdate?(.status(product, L10n.text("WebSocket connected · REST reconciliation active.")))
     }
 
     func socketMessage(_ text: String, key: String, token: UUID) {
@@ -85,7 +85,7 @@ extension PortfolioController {
                     case .portfolio(let value):
                         lastPerpsPush = clock.now
                         acceptPerps(value)
-                        onUpdate?(.status(.perps, "WebSocket · Updated " + value.timestamp.formatted(date: .omitted, time: .standard)))
+                        onUpdate?(.status(.perps, L10n.format("WebSocket · Updated %@", value.timestamp.formatted(.dateTime.hour().minute().second().locale(L10n.locale)))))
                         configureSockets()
                     case .quote(let id, let value): mergeQuotes([id: value]); scheduleQuoteFlush(token: token)
                     case .accountChanged: requestEventRefresh(token: token)
@@ -99,7 +99,7 @@ extension PortfolioController {
                     requestEventRefresh(token: token)
                 }
             }
-        } catch { onUpdate?(.status(key.hasPrefix("perps") ? .perps : .predictions, "A streaming update could not be decoded; REST reconciliation remains active.")) }
+        } catch { onUpdate?(.status(key.hasPrefix("perps") ? .perps : .predictions, L10n.text("A streaming update could not be decoded; REST reconciliation remains active."))) }
     }
 
     func requestEventRefresh(token: UUID) {

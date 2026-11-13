@@ -12,12 +12,9 @@ struct PositionRow: View {
     private var logo: URL? { colorScheme == .dark ? (instrument?.darkLogo ?? instrument?.lightLogo) : instrument?.lightLogo }
     private var fixture: String? { store.isDesignPreview ? (position.id == 2 ? "FigmaUS100" : "FigmaNVDA") : nil }
     private var digits: Int { instrument?.priceDecimals ?? 2 }
-    private var priceIncreased: Bool {
-        if let mark = quote?.mark { return mark >= position.entryPrice }
-        return position.isLong ? position.unrealizedPnl >= 0 : position.unrealizedPnl <= 0
-    }
+    private var isProfitable: Bool { position.unrealizedPnl >= 0 }
     private var quoteHelp: String {
-        "Mark: \(MarketFormat.currency(quote?.mark, fractionDigits: digits))\nBid: \(MarketFormat.currency(quote?.bid, fractionDigits: digits))\nAsk: \(MarketFormat.currency(quote?.ask, fractionDigits: digits))"
+        "\(L10n.text("Mark")): \(MarketFormat.currency(quote?.mark, fractionDigits: digits))\n\(L10n.text("Bid")): \(MarketFormat.currency(quote?.bid, fractionDigits: digits))\n\(L10n.text("Ask")): \(MarketFormat.currency(quote?.ask, fractionDigits: digits))"
     }
 
     var body: some View {
@@ -33,15 +30,15 @@ struct PositionRow: View {
                             Text(instrument?.displaySymbol ?? position.symbol).font(DesignTokens.amount)
                                 .foregroundStyle(DesignTokens.primary)
                                 .lineLimit(1).minimumScaleFactor(0.75)
-                            Image(systemName: priceIncreased ? "arrow.up.right.circle.fill" : "arrow.down.right.circle.fill")
+                            Image(systemName: isProfitable ? "arrow.up.right.circle.fill" : "arrow.down.right.circle.fill")
                                 .font(.system(size: 14)).foregroundStyle(DesignTokens.secondary)
                                 .contentTransition(.symbolEffect(.replace))
-                                .accessibilityLabel(priceIncreased ? "Price up from entry" : "Price down from entry")
+                                .accessibilityLabel(L10n.text(isProfitable ? "Profitable position" : "Losing position"))
                         }.frame(height: 20)
-                        Text("\(position.isLong ? "Long" : "Short") \(position.leverage)x")
+                        Text(verbatim: L10n.format("%@ %lldx", L10n.text(position.isLong ? "Long" : "Short"), position.leverage))
                             .font(DesignTokens.caption).foregroundStyle(DesignTokens.secondary)
                             .frame(height: 15).contentTransition(.numericText())
-                            .help(position.cross ? "Cross margin" : "Isolated margin")
+                            .help(L10n.text(position.cross ? "Cross margin" : "Isolated margin"))
                     }
                 }
                 Spacer(minLength: 0)
@@ -67,7 +64,7 @@ struct PositionRow: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .animation(DesignTokens.numberAnimation, value: position)
-        .animation(DesignTokens.numberAnimation, value: priceIncreased)
+        .animation(DesignTokens.numberAnimation, value: isProfitable)
         }
         .buttonStyle(PressButtonStyle())
         .disabled(store.perpsWebsiteURL == nil)

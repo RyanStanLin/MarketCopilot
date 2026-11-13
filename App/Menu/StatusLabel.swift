@@ -21,6 +21,7 @@ struct StatusLabel: View {
         .animation(DesignTokens.numberAnimation, value: store.statusPortfolio)
         .animation(DesignTokens.numberAnimation, value: store.statusCash)
         .help(store.statusDescription)
+        .environment(\.locale, store.locale)
         .accessibilityElement(children: .combine)
         .transaction { if reduceMotion { $0.disablesAnimations = true } }
     }

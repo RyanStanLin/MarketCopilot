@@ -2,7 +2,7 @@ import MarketCore
 import SwiftUI
 
 struct SummaryRow: View {
-    let title: String
+    let title: LocalizedStringKey
     let amount: Decimal?
     let symbol: String
     var highlighted = false
@@ -32,7 +32,7 @@ struct SummaryRow: View {
         }
         .frame(height: DesignTokens.metricHeight)
         .contentShape(Rectangle())
-        .help(helpText)
+        .help(L10n.text(helpText))
         .animation(DesignTokens.numberAnimation, value: amount)
         .accessibilityElement(children: .combine)
         .menuHover(.summary, id: hoverID)

@@ -67,8 +67,8 @@ final class AppCoordinator {
                 if path.status == .satisfied { self?.restart() }
                 else {
                     self?.controller?.stop()
-                    self?.store.predictionStatus = "Offline — showing the last valid snapshot."
-                    self?.store.perpsStatus = "Offline — showing the last valid snapshot."
+                    self?.store.predictionStatus = L10n.text("Offline — showing the last valid snapshot.")
+                    self?.store.perpsStatus = L10n.text("Offline — showing the last valid snapshot.")
                 }
             }
         }

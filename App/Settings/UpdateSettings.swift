@@ -23,8 +23,8 @@ struct UpdateSettings: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Connection status") {
-                LabeledContent("Predictions") { Text(store.predictionStatus).textSelection(.enabled) }
-                LabeledContent("Perps") { Text(store.perpsStatus).textSelection(.enabled) }
+                LabeledContent("Predictions") { Text(L10n.text(store.predictionStatus)).textSelection(.enabled) }
+                LabeledContent("Perps") { Text(L10n.text(store.perpsStatus)).textSelection(.enabled) }
                 Button("Refresh now", action: store.refreshRequested).disabled(store.isRefreshing)
             }
         }.formStyle(.grouped)

@@ -17,7 +17,7 @@ extension AppStore {
         case .busy(let busy):
             isRefreshing = busy; isConnecting = busy
             if !busy && account.isConfigured {
-                settingsNotice = "Predictions: " + predictionStatus + "\nPerps: " + perpsStatus
+                settingsNotice = L10n.format("Predictions: %@\nPerps: %@", L10n.text(predictionStatus), L10n.text(perpsStatus))
             }
         }
     }

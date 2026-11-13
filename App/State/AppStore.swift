@@ -32,6 +32,7 @@ final class AppStore {
     @ObservationIgnored var refreshRequested: () -> Void = {}
     @ObservationIgnored var drawerChanged: () -> Void = {}
     @ObservationIgnored var settingsApplied: () -> Void = {}
+    @ObservationIgnored var displayPreferencesChanged: () -> Void = {}
     @ObservationIgnored var repository: WorkspaceRepository?
     @ObservationIgnored var activeSecrets = AccountSecrets()
     #if DEBUG
@@ -58,10 +59,15 @@ final class AppStore {
             - DesignTokens.collapsedHeight + DesignTokens.separatorHeight
     }
     var statusPortfolio: Decimal? { isDesignPreview ? Decimal(string: "26.09") : snapshot.portfolio }
-    var statusCash: Decimal? { isDesignPreview ? Decimal(string: "8.01") : snapshot.cash }
+    var statusCash: Decimal? {
+        let cash = isDesignPreview ? Decimal(string: "8.01") : snapshot.cash
+        return cash.map { $0 + refreshSettings.cashOffset }
+    }
+    var locale: Locale { refreshSettings.language.locale }
     var statusDescription: String {
-        let totals = snapshot.hasPartialTotals ? "Totals include the available balances and holdings. Some sources are unavailable.\n" : ""
-        return totals + predictionStatus + "\n" + perpsStatus
+        let totals = snapshot.hasPartialTotals ? L10n.text("Totals include the available balances and holdings. Some sources are unavailable.") + "\n" : ""
+        let offset = refreshSettings.cashOffset == 0 ? "" : "\n" + L10n.format("Cash offset: %@", MarketFormat.currency(refreshSettings.cashOffset, signed: true))
+        return totals + L10n.text(predictionStatus) + "\n" + L10n.text(perpsStatus) + offset
     }
 
     func toggleDrawer() {

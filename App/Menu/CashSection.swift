@@ -1,4 +1,5 @@
 import SwiftUI
+import MarketCore
 
 struct CashSection: View {
     let store: AppStore
@@ -15,7 +16,7 @@ struct CashSection: View {
                            symbol: "loupe", helpText: store.predictionStatus, hoverID: "cashPredictions")
                 SummaryRow(title: "Perps", amount: store.snapshot.perps?.cash,
                            symbol: "arrow.forward.circle.dotted",
-                           helpText: "Available order margin\n" + store.perpsStatus, hoverID: "cashPerps")
+                           helpText: L10n.text("Available order margin") + "\n" + L10n.text(store.perpsStatus), hoverID: "cashPerps")
             }.padding(.vertical, 6)
             MenuSeparator()
             Button(action: store.openSettings) {

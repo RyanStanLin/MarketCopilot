@@ -21,5 +21,6 @@ struct SettingsRoot: View {
             }.padding(16)
         }
         .frame(width: 580, height: 640)
+        .environment(\.locale, store.locale)
     }
 }

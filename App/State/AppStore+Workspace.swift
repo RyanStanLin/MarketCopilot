@@ -10,6 +10,7 @@ extension AppStore {
             let (account, settings, cached, instruments) = try repository.load()
             self.account = account; accountDraft = account
             refreshSettings = settings; refreshDraft = settings
+            L10n.language = settings.language
             self.instruments = instruments
             if account.isConfigured {
                 secretsDraft = try KeychainVault().load(identity: account.identity)
@@ -19,20 +20,20 @@ extension AppStore {
             }
             if let cached {
                 snapshot = cached
-                predictionStatus = "Cached data — reconnecting."
-                perpsStatus = "Cached data — reconnecting."
+                predictionStatus = L10n.text("Cached data — reconnecting.")
+                perpsStatus = L10n.text("Cached data — reconnecting.")
             }
         } catch { settingsNotice = error.localizedDescription }
     }
 
     func saveWorkspace() {
         guard !isDesignPreview else {
-            settingsNotice = "Design preview is isolated from saved accounts. Relaunch without --design-preview to connect."
+            settingsNotice = L10n.text("Design preview is isolated from saved accounts. Relaunch without --design-preview to connect.")
             return
         }
         guard !isSavingAccount else { return }
         isSavingAccount = true
-        settingsNotice = "Connecting your account…"
+        settingsNotice = L10n.text("Connecting your account…")
         let draft = accountDraft, settings = refreshDraft, secrets = secretsDraft
         Task { await saveResolvedWorkspace(draft: draft, refresh: settings, secrets: secrets) }
     }
@@ -68,14 +69,16 @@ extension AppStore {
             let loginChanged = refreshSettings.launchAtLogin != settings.launchAtLogin
             self.account = account; accountDraft = account
             refreshSettings = settings; refreshDraft = settings; secretsDraft = secrets; activeSecrets = secrets
+            L10n.language = settings.language
+            displayPreferencesChanged()
             let address = account.walletAddress.isEmpty ? account.perpsAddress : account.walletAddress
             accountName = String(address.prefix(6)) + "…" + address.suffix(4)
-            settingsNotice = "Saved. Connecting to Polymarket…"
+            settingsNotice = L10n.text("Saved. Connecting to Polymarket…")
             if loginChanged {
                 do {
                     if settings.launchAtLogin { try SMAppService.mainApp.register() }
                     else { try await SMAppService.mainApp.unregister() }
-                } catch { settingsNotice = "Account saved. Login item: " + error.localizedDescription }
+                } catch { settingsNotice = L10n.format("Account saved. Login item: %@", error.localizedDescription) }
             }
             settingsApplied()
         } catch { settingsNotice = error.localizedDescription }
@@ -84,7 +87,7 @@ extension AppStore {
     func persistSnapshot() {
         guard !isDesignPreview else { return }
         do { try repository?.save(account: account, settings: refreshSettings, snapshot: snapshot, instruments: instruments) }
-        catch { settingsNotice = "Cache could not be saved: " + error.localizedDescription }
+        catch { settingsNotice = L10n.format("Cache could not be saved: %@", error.localizedDescription) }
     }
 
     func disconnect() {
@@ -94,10 +97,10 @@ extension AppStore {
             account = AccountConfiguration(); accountDraft = account
             secretsDraft = AccountSecrets(); activeSecrets = AccountSecrets(); snapshot = PortfolioSnapshot(); quotes = [:]
             accountName = "Connect account"; avatarURL = nil
-            predictionStatus = "Connect your account in Settings."
+            predictionStatus = L10n.text("Connect your account in Settings.")
             perpsStatus = predictionStatus
             try repository?.save(account: account, settings: refreshSettings, snapshot: nil, instruments: instruments)
-            settingsNotice = "Account disconnected. Local credentials and portfolio cache removed."
+            settingsNotice = L10n.text("Account disconnected. Local credentials and portfolio cache removed.")
             settingsApplied()
         } catch { settingsNotice = error.localizedDescription }
     }

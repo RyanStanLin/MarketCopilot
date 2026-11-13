@@ -13,7 +13,7 @@ struct PositionsDrawer: View {
             }
         }
         .frame(height: max(0, height - 2), alignment: .top)
-        .background(DesignTokens.iconFill)
+        .background(.quaternary)
         .padding(.vertical, 1)
         .background(DesignTokens.drawerBorder)
         .accessibilityIdentifier("positionsDrawer")

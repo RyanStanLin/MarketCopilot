@@ -23,6 +23,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.setAccessibilityLabel(MarketCore.name)
         statusItem = item
         store.openSettings = { [weak self] in self?.showSettings() }
+        store.displayPreferencesChanged = { [weak self] in
+            self?.settingsWindow?.title = L10n.text("MarketCopilot Settings")
+            self?.updateStatus()
+        }
         store.renderedMenuHeightChanged = { [weak self] height in self?.resizeMenu(height: height) }
         updateStatus()
         observeStatus()
@@ -94,7 +98,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if settingsWindow == nil {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 580, height: 640),
                                   styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-            window.title = "MarketCopilot Settings"
+            window.title = L10n.text("MarketCopilot Settings")
             window.contentView = NSHostingView(rootView: SettingsRoot(store: store))
             window.isReleasedWhenClosed = false
             window.center()
@@ -137,8 +141,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.addSubview(host)
             statusHost = host
         }
-        let portfolioWidth = max(textWidth(MarketFormat.currency(store.statusPortfolio), size: 13), textWidth("Portfolio", size: 10))
-        let cashWidth = max(textWidth(MarketFormat.currency(store.statusCash), size: 13), textWidth("Cash", size: 10))
+        let portfolioWidth = max(textWidth(MarketFormat.currency(store.statusPortfolio), size: 13), textWidth(L10n.text("Portfolio"), size: 10))
+        let cashWidth = max(textWidth(MarketFormat.currency(store.statusCash), size: 13), textWidth(L10n.text("Cash"), size: 10))
         let width = ceil((portfolioWidth + cashWidth + 8) * min(1, height / 26)) + 12
         item.length = width
         statusHost?.frame = NSRect(x: 0, y: 0, width: width, height: height)
