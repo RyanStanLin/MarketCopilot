@@ -5,6 +5,9 @@ let package = Package(
     name: "MarketCopilot",
     platforms: [.macOS("27.0")],
     products: [.library(name: "MarketCore", targets: ["MarketCore"])],
-    targets: [.target(name: "MarketCore")],
+    targets: [
+        .target(name: "MarketCore"),
+        .testTarget(name: "MarketCoreTests", dependencies: ["MarketCore"])
+    ],
     swiftLanguageModes: [.v6]
 )

@@ -6,9 +6,12 @@ struct MarketCopilotApp: App {
 
     var body: some Scene {
         Settings {
-            Text("MarketCopilot")
-                .padding(32)
-                .frame(width: 480, height: 320)
+            SettingsRoot(store: delegate.store)
+        }
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…", action: delegate.showSettings).keyboardShortcut(",")
+            }
         }
     }
 }

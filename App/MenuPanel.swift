@@ -1,6 +1,7 @@
 import AppKit
 
 final class MenuPanel: NSPanel {
+    var onCancel: () -> Void = {}
     override var canBecomeKey: Bool { true }
 
     init() {
@@ -14,5 +15,5 @@ final class MenuPanel: NSPanel {
         animationBehavior = .none
     }
 
-    override func cancelOperation(_ sender: Any?) { orderOut(sender) }
+    override func cancelOperation(_ sender: Any?) { onCancel() }
 }
