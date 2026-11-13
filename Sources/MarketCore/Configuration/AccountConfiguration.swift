@@ -22,6 +22,6 @@ public struct AccountConfiguration: Codable, Equatable, Sendable {
     }
 
     public static func isAddress(_ text: String) -> Bool {
-        text.count == 42 && text.hasPrefix("0x") && text.dropFirst(2).allSatisfy(\.isHexDigit)
+        text.count == 42 && text.hasPrefix("0x") && text.dropFirst(2).allSatisfy { $0.isASCII && $0.isHexDigit }
     }
 }
