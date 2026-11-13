@@ -1,0 +1,12 @@
+{
+  "data": "https://data-api.polymarket.com",
+  "clob": "https://clob.polymarket.com",
+  "gamma": "https://gamma-api.polymarket.com",
+  "perps": "https://api.perpetuals.polymarket.com",
+  "predictionMarketSocket": "wss://ws-subscriptions-clob.polymarket.com/ws/market",
+  "predictionUserSocket": "wss://ws-subscriptions-clob.polymarket.com/ws/user",
+  "perpsSocket": "wss://ws.perpetuals.polymarket.com/v1/ws",
+  "perpsWebsite": "https://polymarket.com/perps",
+  "collateralDecimals": 6,
+  "requestTimeout": 15
+}

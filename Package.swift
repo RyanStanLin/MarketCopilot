@@ -6,7 +6,7 @@ let package = Package(
     platforms: [.macOS("27.0")],
     products: [.library(name: "MarketCore", targets: ["MarketCore"])],
     targets: [
-        .target(name: "MarketCore"),
+        .target(name: "MarketCore", resources: [.process("Resources")]),
         .testTarget(name: "MarketCoreTests", dependencies: ["MarketCore"])
     ],
     swiftLanguageModes: [.v6]
