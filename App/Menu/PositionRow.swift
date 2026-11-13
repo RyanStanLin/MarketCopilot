@@ -31,6 +31,7 @@ struct PositionRow: View {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 4) {
                             Text(instrument?.displaySymbol ?? position.symbol).font(DesignTokens.amount)
+                                .foregroundStyle(DesignTokens.primary)
                                 .lineLimit(1).minimumScaleFactor(0.75)
                             Image(systemName: priceIncreased ? "arrow.up.right.circle.fill" : "arrow.down.right.circle.fill")
                                 .font(.system(size: 14)).foregroundStyle(DesignTokens.secondary)

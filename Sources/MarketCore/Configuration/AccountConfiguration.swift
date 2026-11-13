@@ -7,7 +7,7 @@ public struct AccountConfiguration: Codable, Equatable, Sendable {
     public var perpsAddress = ""
     public init() {}
 
-    public var isConfigured: Bool { Self.isAddress(walletAddress) }
+    public var isConfigured: Bool { Self.isAddress(walletAddress) || Self.isAddress(perpsAddress) }
     public var identity: String { walletAddress.lowercased() + ":" + perpsAddress.lowercased() }
 
     public func validated() throws -> Self {
@@ -15,9 +15,10 @@ public struct AccountConfiguration: Codable, Equatable, Sendable {
         result.walletAddress = walletAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         result.signerAddress = signerAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         result.perpsAddress = perpsAddress.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard Self.isAddress(result.walletAddress) else { throw ConfigurationError.invalidWallet }
+        guard result.walletAddress.isEmpty || Self.isAddress(result.walletAddress) else { throw ConfigurationError.invalidWallet }
         guard result.signerAddress.isEmpty || Self.isAddress(result.signerAddress) else { throw ConfigurationError.invalidSigner }
         guard result.perpsAddress.isEmpty || Self.isAddress(result.perpsAddress) else { throw ConfigurationError.invalidPerpsOwner }
+        guard result.isConfigured else { throw ConfigurationError.invalidWallet }
         return result
     }
 

@@ -20,6 +20,7 @@ enum PredictionWire {
         enum CodingKeys: String, CodingKey { case nextCursor = "next_cursor", hasMore = "has_more" }
     }
     struct Balance: Decodable, Sendable { let balance: APIAmount }
+    struct ProfileSearch: Decodable, Sendable { let profiles: [Profile]? }
     struct Profile: Decodable, Sendable {
         let name: String?
         let pseudonym: String?

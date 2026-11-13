@@ -24,6 +24,7 @@ final class AppStore {
     var secretsDraft = AccountSecrets()
     var settingsNotice = ""
     var isConnecting = false
+    var isSavingAccount = false
     let isDesignPreview: Bool
 
     @ObservationIgnored var openSettings: () -> Void = {}

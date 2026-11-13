@@ -3,6 +3,10 @@ import Foundation
 extension PortfolioController {
     func refreshPredictions(token: UUID, force: Bool) async {
         guard let account, mayRefresh(.predictions, force: force, last: lastPredictionREST, interval: settings.pollingInterval) else { return }
+        guard AccountConfiguration.isAddress(account.walletAddress) else {
+            onUpdate?(.status(.predictions, "Add a Polymarket wallet or profile in Settings to include Predictions."))
+            return
+        }
         do {
             let result = try await source.predictions(account: account, credentials: secrets.prediction)
             guard isCurrent(token) else { return }
@@ -10,7 +14,8 @@ extension PortfolioController {
             authenticationBlocked.remove(.predictions); retryNotBefore[.predictions] = nil
             onUpdate?(.predictions(result))
             let transport = healthySockets.contains("predictionMarket") || healthySockets.contains("predictionUser") ? "WebSocket + REST" : "Polling"
-            let text = result.cash == nil ? "Cash unavailable — add CLOB credentials." : transport + " · Updated " + result.timestamp.formatted(date: .omitted, time: .standard)
+            let text = result.cash == nil ? "Holdings updated · Cash temporarily unavailable; totals include known holdings."
+                : transport + " · Updated " + result.timestamp.formatted(date: .omitted, time: .standard)
             onUpdate?(.status(.predictions, text))
         } catch { failed(error, product: .predictions, token: token) }
     }
@@ -52,7 +57,7 @@ extension PortfolioController {
                 lastMetadata = clock.now; onUpdate?(.instruments(instruments))
             } catch { /* Optional metadata must not block authoritative account reads. */ }
         }
-        if let account, clock.now.timeIntervalSince(lastProfile) >= 600 {
+        if let account, AccountConfiguration.isAddress(account.walletAddress), clock.now.timeIntervalSince(lastProfile) >= 600 {
             do {
                 let profile = try await source.profile(wallet: account.walletAddress)
                 guard isCurrent(token) else { return }

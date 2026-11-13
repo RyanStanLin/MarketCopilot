@@ -14,7 +14,8 @@ extension AppStore {
             if account.isConfigured {
                 secretsDraft = try KeychainVault().load(identity: account.identity)
                 activeSecrets = secretsDraft
-                accountName = String(account.walletAddress.prefix(6)) + "…" + account.walletAddress.suffix(4)
+                let address = account.walletAddress.isEmpty ? account.perpsAddress : account.walletAddress
+                accountName = String(address.prefix(6)) + "…" + address.suffix(4)
             }
             if let cached {
                 snapshot = cached
@@ -29,10 +30,33 @@ extension AppStore {
             settingsNotice = "Design preview is isolated from saved accounts. Relaunch without --design-preview to connect."
             return
         }
+        guard !isSavingAccount else { return }
+        isSavingAccount = true
+        settingsNotice = "Connecting your account…"
+        let draft = accountDraft, settings = refreshDraft, secrets = secretsDraft
+        Task { await saveResolvedWorkspace(draft: draft, refresh: settings, secrets: secrets) }
+    }
+
+    private func saveResolvedWorkspace(draft: AccountConfiguration, refresh: RefreshSettings, secrets: AccountSecrets) async {
+        defer { isSavingAccount = false }
         do {
-            let account = try accountDraft.validated()
-            let settings = try refreshDraft.validated()
-            let secrets = try secretsDraft.validated(account: account)
+            let settings = try refresh.validated()
+            let configuration = try APIConfiguration.bundled()
+            var resolved = draft
+            resolved.walletAddress = draft.walletAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+            resolved.perpsAddress = draft.perpsAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !resolved.walletAddress.isEmpty {
+                resolved.walletAddress = try await PredictionClient(configuration: configuration).resolveWallet(resolved.walletAddress)
+            } else {
+                let trimmedSecrets = try secrets.validated(account: resolved)
+                guard let perps = trimmedSecrets.perps else { throw ConfigurationError.incompletePerpsCredentials }
+                if resolved.perpsAddress.isEmpty {
+                    resolved.perpsAddress = try await PerpsClient(configuration: configuration)
+                        .validate(credentials: perps, expectedOwner: nil)
+                }
+            }
+            let account = try resolved.validated()
+            let secrets = try secrets.validated(account: account)
             guard let repository else { throw CocoaError(.fileWriteUnknown) }
             let sameAccount = self.account.identity == account.identity
             try KeychainVault().save(secrets, identity: account.identity)
@@ -44,12 +68,13 @@ extension AppStore {
             let loginChanged = refreshSettings.launchAtLogin != settings.launchAtLogin
             self.account = account; accountDraft = account
             refreshSettings = settings; refreshDraft = settings; secretsDraft = secrets; activeSecrets = secrets
-            accountName = String(account.walletAddress.prefix(6)) + "…" + account.walletAddress.suffix(4)
+            let address = account.walletAddress.isEmpty ? account.perpsAddress : account.walletAddress
+            accountName = String(address.prefix(6)) + "…" + address.suffix(4)
             settingsNotice = "Saved. Connecting to Polymarket…"
             if loginChanged {
                 do {
                     if settings.launchAtLogin { try SMAppService.mainApp.register() }
-                    else { try SMAppService.mainApp.unregister() }
+                    else { try await SMAppService.mainApp.unregister() }
                 } catch { settingsNotice = "Account saved. Login item: " + error.localizedDescription }
             }
             settingsApplied()

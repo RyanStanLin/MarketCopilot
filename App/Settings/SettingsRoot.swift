@@ -14,10 +14,10 @@ struct SettingsRoot: View {
             HStack(spacing: 12) {
                 Text(store.settingsNotice).font(.caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled)
-                if store.isConnecting { ProgressView().controlSize(.small) }
+                if store.isConnecting || store.isSavingAccount { ProgressView().controlSize(.small) }
                 Button("Save & Connect", action: store.saveWorkspace)
                     .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
-                    .disabled(store.isConnecting).accessibilityIdentifier("saveAccount")
+                    .disabled(store.isConnecting || store.isSavingAccount).accessibilityIdentifier("saveAccount")
             }.padding(16)
         }
         .frame(width: 580, height: 640)

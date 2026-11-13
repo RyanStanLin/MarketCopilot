@@ -12,7 +12,7 @@ public struct PredictionClient: Sendable {
     public func snapshot(account: AccountConfiguration, credentials: PredictionCredentials?) async throws -> PredictionSnapshot {
         async let value = holdingsValue(wallet: account.walletAddress)
         async let positions = positions(wallet: account.walletAddress)
-        async let balance: Decimal? = cash(account: account, credentials: credentials)
+        async let balance: Decimal? = availableCash(account: account, credentials: credentials)
         return try await PredictionSnapshot(holdingsValue: value, cash: balance, positions: positions)
     }
 
@@ -45,7 +45,19 @@ public struct PredictionClient: Sendable {
     }
 
     public func cash(account: AccountConfiguration, credentials: PredictionCredentials?) async throws -> Decimal? {
-        guard let credentials else { return nil }
+        if let credentials {
+            do { return try await authenticatedCash(account: account, credentials: credentials) }
+            catch is CancellationError { throw CancellationError() }
+            catch { /* Public pUSD reads do not depend on trading credentials. */ }
+        }
+        return try await PolygonBalanceClient(configuration: configuration, http: http).balance(wallet: account.walletAddress)
+    }
+
+    private func availableCash(account: AccountConfiguration, credentials: PredictionCredentials?) async -> Decimal? {
+        try? await cash(account: account, credentials: credentials)
+    }
+
+    private func authenticatedCash(account: AccountConfiguration, credentials: PredictionCredentials) async throws -> Decimal {
         guard AccountConfiguration.isAddress(account.signerAddress) else { throw ConfigurationError.invalidSigner }
         let serverTime = try await http.get(Int64.self, base: configuration.clob, path: "/time")
         let headers = try CLOBAuthentication.headers(credentials: credentials, signer: account.signerAddress,
@@ -61,5 +73,11 @@ public struct PredictionClient: Sendable {
         let value = try await http.get(PredictionWire.Profile.self, base: configuration.gamma,
                                       path: "/public-profile", query: [.init(name: "address", value: wallet)])
         return AccountProfile(name: value.name ?? value.pseudonym, avatar: value.profileImage, wallet: value.proxyWallet)
+    }
+
+    func searchProfiles(_ name: String) async throws -> PredictionWire.ProfileSearch {
+        try await http.get(PredictionWire.ProfileSearch.self, base: configuration.gamma,
+            path: "/public-search", query: [.init(name: "q", value: name), .init(name: "search_profiles", value: "true"),
+                .init(name: "search_tags", value: "false"), .init(name: "limit_per_type", value: "50")])
     }
 }

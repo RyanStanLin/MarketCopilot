@@ -19,20 +19,19 @@ zsh Scripts/build.sh Release
 
 点击菜单栏的 Portfolio / Cash → Settings → Account：
 
-1. **Account wallet**：从 Polymarket 个人菜单复制账户钱包地址。
-2. **Signer address / Wallet type**：填写 CLOB 凭证对应的签名者与钱包类型。新 Deposit Wallet 与旧 Proxy / Safe 不同；签名者地址也可能不同于账户钱包。
-3. **Predictions**：填写官方 CLOB L2 的 API key、secret、passphrase。不要填 Builder 或 Relayer 的 key。
-4. **Perps**：填写官方 Perps delegated session 的 proxy address 和 secret；可额外填写预期账户 owner，防止导入其他账户的凭证。
-5. 点击 **Save & Connect**；Updates 页显示各数据源的连接状态。
+1. **Predictions → Wallet or profile**：粘贴账户钱包地址、`@用户名` 或 Polymarket 个人主页链接。Google / 邮箱登录账户同样适用，不需要 CLOB key 或钱包签名。用户名通过官方 Gamma API 精确匹配；无法唯一匹配时使用个人菜单中的账户钱包地址。
+2. **Perps**：填写官方 Perps delegated session 的 proxy address 和 secret；可额外填写预期账户 owner。只连接 Perps 时可留空 Predictions；应用会从官方凭证接口确认 owner。
+3. 点击 **Save & Connect**；Updates 页显示各数据源的连接状态。
 
-凭证创建方式见 [CLOB 官方认证指南](https://docs.polymarket.com/getting-started/api#authentication) 与 [Perps 官方 session 指南](https://docs.polymarket.com/perps/authenticated-sessions)。本应用导入现有凭证，不创建交易授权、不接收钱包私钥。
+Predictions 使用官方公开 Data / Gamma API，并通过 Polygon 官方文档列出的公共 RPC，读取 Polymarket 官方 pUSD 合约的 `balanceOf`；请求只包含 `eth_chainId` / `eth_call`，不创建授权、不提交交易。合约与网络配置在 `Sources/MarketCore/Resources/Endpoints.json`。见 [官方钱包说明](https://docs.polymarket.com/trading/wallets-auth)、[pUSD 合约](https://docs.polymarket.com/resources/contracts) 和 [Polygon RPC](https://docs.polygon.technology/pos/reference/rpc-endpoints)。
 
-仅填公开钱包地址也可以保存，但官方私有现金和 Perps 明细仍需上述凭证。缺失数据显示 `—`；不会用零或示例数据补齐。
+已有 CLOB L2 凭证可在折叠的 **Advanced Predictions access** 中选填，用于私有订单/成交通知；正常读取资产和现金不依赖这些凭证。Perps 明细仍需要 [官方 session 凭证](https://docs.polymarket.com/perps/authenticated-sessions)。单个来源尚未配置或不可用时，菜单栏汇总已有来源；只有完全没有可用数据时才显示 `—`。悬停说明会标明汇总包含的可用部分。
 
 ## 使用与更新
 
 - 菜单栏持续显示两类资产的合计 Portfolio 与合计 Cash。
 - 打开菜单或展开 Perps 抽屉会立即请求最新数据；抽屉中直接显示全部持仓及六项明细。
+- 持仓更新保留已有显示顺序，新持仓追加到底部；关闭后移除。图标固定为 32×32。标题箭头按标记价相对入场价显示上涨/下跌，点击整张持仓打开 Polymarket Perps。
 - 点击行情数值可通过悬停说明查看 mark / bid / ask。原稿 `Liq. price` 表示清算价。
 - Updates 可分别选择 WebSocket 优先或仅轮询，设置 1–300 秒轮询间隔和 10–600 秒校准间隔。
 - 官方 Perps 账户推送约每 5 秒一次；行情推送可以更快，画面合并到最多每秒 4 次，避免数字动画反复打断。
@@ -44,7 +43,7 @@ zsh Scripts/build.sh Release
 | 项目 | 来源 |
 |---|---|
 | Predictions Portfolio | Data API v2 `/v2/value`（包含官方组合持仓估值）+ Prediction Cash |
-| Predictions Cash | CLOB collateral balance，以官方 6 位基础单位换算 |
+| Predictions Cash | 官方 pUSD 合约的链上余额；选填 CLOB 时优先使用其 collateral balance，失败回退链上读取；以官方 6 位基础单位换算 |
 | Perps Portfolio | `margin.total_account_value`，已经是账户净值 |
 | Perps Cash | `margin.available_order_margin`，不是 withdrawable |
 | Position / Margin / Funding | 官方 `position_value` / `initial_margin` / `cumulative_funding` |

@@ -11,7 +11,7 @@
 
 | Requirement | Evidence |
 |---|---|
-| Totals include cash once and preserve unavailable values | `totalsIncludePredictionCashWithoutDoubleCountingPerpsCash`, `missingProductDoesNotBecomeZeroInTotals`, `confirmedEmptyAccountsAreValidZeroBalances` |
+| Totals include cash once and sum available products | `totalsIncludePredictionCashWithoutDoubleCountingPerpsCash`, `totalsUseAvailableProductsAndKeepEntirelyMissingBalancesUnavailable`, `confirmedEmptyAccountsAreValidZeroBalances` (assertions updated; not rerun after the user's request to skip checks) |
 | Exact money, percentage and Funding representation | `exactStringAndNumberAmountsNeverPassThroughDouble`, `malformedAndUnavailableAmountsAreRejected`, `formattingPreservesSignedMoneyAndFundingPrecision` |
 | Official CLOB signing and cash units | `signsCanonicalPathWithUrlSafeHmacAndPreservesPadding`, `cashUsesSignerHeadersWalletTypeAndSixDecimalUnits` |
 | Complete Prediction positions and v2 envelope | `walksAllPositionCursorsKeepingWalletAnchorAndDeduplicatingTokens`, `rejectsRepeatingCursorsInsteadOfReturningPartialHoldings`, `decodesPortfolioNumbersAsDecimalAndMissingCashStaysUnavailable` |
@@ -31,7 +31,7 @@
 
 The drawer revision passed the four focused `MenuInteractionTests` and a Debug build. `--design-preview --validate-motion` sampled 171 native frames across opening, closing and an interrupted reversal. All six checks passed: `sampledIntermediateFrames`, `windowTopAndLeftStayFixed`, `headerStaysAtTop`, `drawerContentStaysBelowParent`, `cashFollowsClippedViewport`, `reversedAnimationReturnsToCollapsedHeight`. The complete two-position fixture is used independently of the status bar's initial screen-height constraint. Geometry sampling verifies positions, not composited pixels.
 
-The user requested skipping further checks after this revision. No additional suite, Release build or visual verification was run afterward.
+The user requested skipping further checks. The subsequent Google-account simplification, stable position order, square icons, price-direction arrows, full-row links and partial totals were implemented with tests and UI checks skipped as requested. Existing total assertions were adjusted to the new behavior but not run. The Release build succeeded to produce the installed application. The on-chain cash path and profile resolver have not been exercised with a live account in this revision.
 
 ## Visual verification limits
 

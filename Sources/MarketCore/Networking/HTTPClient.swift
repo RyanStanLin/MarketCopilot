@@ -16,6 +16,21 @@ public struct HTTPClient: Sendable {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
+        return try await send(type, request: request)
+    }
+
+    public func post<T: Decodable & Sendable, Body: Encodable & Sendable>(_ type: T.Type,
+        url: URL, body: Body) async throws -> T {
+        guard url.scheme == "https" else { throw URLError(.badURL) }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
+        return try await send(type, request: request)
+    }
+
+    private func send<T: Decodable & Sendable>(_ type: T.Type, request: URLRequest) async throws -> T {
         let (data, response) = try await transport.data(for: request)
         guard (200..<300).contains(response.statusCode) else {
             let message: String

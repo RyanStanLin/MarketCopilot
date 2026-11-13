@@ -13,7 +13,7 @@ struct UpdateSettings: View {
                 Picker("Perps", selection: $store.refreshDraft.perpsMode) {
                     ForEach(TransportMode.allCases) { Text($0.title).tag($0) }
                 }
-                Text("WebSocket is preferred where supported, with polling fallback. Prediction cash still uses REST. Updates continue while the menu is closed.")
+                Text("WebSocket is preferred where supported, with polling fallback. Prediction cash uses a read-only Polygon balance query. Updates continue while the menu is closed.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Frequency") {
