@@ -12,8 +12,8 @@ if [[ "${GITHUB_REF:-}" != refs/heads/main ]]; then
 fi
 
 release_tag="v${MARKETCOPILOT_VERSION}"
-release_notes="$(mktemp "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/MarketCopilot-release.XXXXXX")"
-trap 'rm -f -- "$release_notes"' EXIT
+release_payload="$(mktemp "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/MarketCopilot-release.XXXXXX")"
+trap 'rm -f -- "$release_payload"' EXIT
 
 shopt -s nullglob
 release_assets=(dist/*.dmg dist/*.dmg.sha256)
@@ -31,7 +31,10 @@ if [[ -n "$tag_commit" && "$tag_commit" != "$GITHUB_SHA" ]]; then
     exit 1
 fi
 
-if release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${release_tag}" --jq '.id' 2>/dev/null)"; then
+# The tag endpoint only serves published releases. List drafts for resuming a run.
+release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" --paginate \
+    --jq ".[] | select(.tag_name == \"${release_tag}\") | .id")"
+if [[ -n "$release_id" ]]; then
     is_draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq '.draft')"
     if [[ "$is_draft" == false ]]; then
         # A successful rerun keeps published assets intact, including immutable releases.
@@ -39,19 +42,26 @@ if release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${release_tag}
         exit 0
     fi
 else
-    python3 - <<'PY' > "$release_notes"
+    python3 - <<'PY' > "$release_payload"
+import json
 import os
-print("macOS 27+ · Apple Silicon (arm64)\n")
-print("Download the DMG and drag MarketCopilot to Applications.")
-print("下载 DMG，将 MarketCopilot 拖入 Applications 即可安装。\n")
-print("Built with local ad-hoc signing; Developer ID signing and notarization are not configured.\n")
-print(f"Source commit: `{os.environ['GITHUB_SHA']}`")
-print(f"Build: {os.environ['GITHUB_RUN_NUMBER']}")
+body = "\n".join([
+    "macOS 27+ · Apple Silicon (arm64)\n",
+    "Download the DMG and drag MarketCopilot to Applications.",
+    "下载 DMG，将 MarketCopilot 拖入 Applications 即可安装。\n",
+    "Built with local ad-hoc signing; Developer ID signing and notarization are not configured.\n",
+    f"Source commit: `{os.environ['GITHUB_SHA']}`",
+    f"Build: {os.environ['GITHUB_RUN_NUMBER']}",
+])
+version = os.environ["MARKETCOPILOT_VERSION"]
+json.dump({
+    "tag_name": f"v{version}", "target_commitish": os.environ["GITHUB_SHA"],
+    "name": f"MarketCopilot {version}", "body": body, "draft": True,
+    "generate_release_notes": True,
+}, fp=__import__("sys").stdout)
 PY
-    gh release create "$release_tag" --repo "$GITHUB_REPOSITORY" \
-        --target "$GITHUB_SHA" --title "MarketCopilot ${MARKETCOPILOT_VERSION}" \
-        --notes-file "$release_notes" --generate-notes --draft
-    release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${release_tag}" --jq '.id')"
+    release_id="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+        --input "$release_payload" --jq '.id')"
 fi
 
 gh release upload "$release_tag" "${release_assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
