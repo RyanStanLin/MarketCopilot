@@ -27,26 +27,46 @@ struct PositionsContent: View {
                             .frame(maxWidth: .infinity).frame(height: rowHeight)
                     }
                     ForEach(items) { item in
-                        Group {
-                            switch item {
-                            case .prediction(let position): PredictionRow(position: position, store: store)
-                            case .perps(let position): PositionRow(position: position, store: store)
+                        VStack(spacing: DesignTokens.rowGap) {
+                            VStack(spacing: 0) {
+                                switch item {
+                                case .prediction(let position): PredictionRow(position: position, store: store)
+                                case .perps(let position): PositionRow(position: position, store: store)
+                                }
+                            }
+                            .frame(width: DesignTokens.menuWidth - 2 * DesignTokens.inset)
+                            // Include the complete rounded hover background in the raster layer.
+                            .padding(.horizontal, DesignTokens.positionHoverOutset)
+                            .modifier(DrawerReelEffect(viewportHeight: viewportHeight,
+                                topStrength: canScroll ? scroll.topStrength : 0,
+                                bottomStrength: canScroll ? scroll.bottomStrength : 0))
+                            .animation(DesignTokens.scrollEffectAnimation, value: scroll.topStrength)
+                            .animation(DesignTokens.scrollEffectAnimation, value: scroll.bottomStrength)
+                            if item.id != items.last?.id {
+                                MenuSeparator().padding(.horizontal, DesignTokens.positionHoverOutset)
+                                    .modifier(DrawerReelEffect(viewportHeight: viewportHeight,
+                                        topStrength: canScroll ? scroll.topStrength : 0,
+                                        bottomStrength: canScroll ? scroll.bottomStrength : 0))
+                                    .animation(DesignTokens.scrollEffectAnimation, value: scroll.topStrength)
+                                    .animation(DesignTokens.scrollEffectAnimation, value: scroll.bottomStrength)
                             }
                         }
-                        .modifier(DrawerReelEffect(viewportHeight: viewportHeight,
-                            topActive: canScroll && scroll.hasAbove, bottomActive: canScroll && scroll.hasBelow))
                         .id(item.id)
-                        if item.id != items.last?.id { MenuSeparator() }
                     }
                 }
+                .frame(width: DesignTokens.menuWidth - 2 * (DesignTokens.inset - DesignTokens.positionHoverOutset))
+                .padding(.horizontal, DesignTokens.inset - DesignTokens.positionHoverOutset)
                 .padding(.vertical, 6)
                 .id(product.rawValue + "-start")
+                .background(DrawerScrollAxisLock())
             }
             .scrollIndicators(.never).scrollDisabled(!canScroll).scrollBounceBehavior(.basedOnSize)
             .onScrollGeometryChange(for: DrawerScrollState.self) { geometry in
                 let offset = max(0, geometry.contentOffset.y + geometry.contentInsets.top)
-                return DrawerScrollState(offset: offset, hasAbove: offset > 0.5,
-                    hasBelow: offset + geometry.containerSize.height < geometry.contentSize.height - 0.5)
+                let extent = max(0, geometry.contentSize.height + geometry.contentInsets.top
+                    + geometry.contentInsets.bottom - geometry.containerSize.height)
+                let remaining = max(0, extent - offset)
+                return DrawerScrollState(offset: offset, remaining: remaining)
             } action: { _, value in scroll = value }
             .onScrollPhaseChange { _, phase in
                 if phase == .interacting || phase == .tracking || phase == .decelerating { keyboardIndex = nil }
@@ -61,22 +81,7 @@ struct PositionsContent: View {
                     proxy.scrollTo(next == 0 ? product.rawValue + "-start" : items[next].id, anchor: .top)
                 }
             }
-            .overlay(alignment: .top) {
-                if canScroll && scroll.hasAbove {
-                    LinearGradient(colors: [Color(nsColor: .systemGray), .clear], startPoint: .top, endPoint: .bottom)
-                        .frame(height: DesignTokens.scrollShadowHeight).padding(.horizontal, -DesignTokens.inset)
-                        .allowsHitTesting(false).accessibilityHidden(true)
-                }
-            }
-            .overlay(alignment: .bottom) {
-                if canScroll && scroll.hasBelow {
-                    LinearGradient(colors: [.clear, Color(nsColor: .systemGray)], startPoint: .top, endPoint: .bottom)
-                        .frame(height: DesignTokens.scrollShadowHeight).padding(.horizontal, -DesignTokens.inset)
-                        .offset(y: 9) // Continue through the drawer's 8 pt padding and 1 pt border.
-                        .allowsHitTesting(false).accessibilityHidden(true)
-                }
-            }
         }
-        .frame(height: max(0, viewportHeight))
+        .frame(width: DesignTokens.menuWidth, height: max(0, viewportHeight))
     }
 }

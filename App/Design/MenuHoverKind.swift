@@ -15,7 +15,8 @@ enum MenuHoverKind {
     var insets: EdgeInsets {
         switch self {
         case .summary: .init(top: -5, leading: -6, bottom: -6, trailing: -6)
-        case .position, .action: .init(top: 0, leading: -6, bottom: 0, trailing: -6)
+        case .position: .init(top: 0, leading: -DesignTokens.positionHoverOutset, bottom: 0, trailing: -DesignTokens.positionHoverOutset)
+        case .action: .init(top: 0, leading: -6, bottom: 0, trailing: -6)
         case .profile: .init(top: -4, leading: -4, bottom: -4, trailing: -4)
         case .icon: .init(top: -3, leading: -3, bottom: -3, trailing: -3)
         }

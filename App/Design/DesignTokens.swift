@@ -18,7 +18,11 @@ enum DesignTokens {
     static let positionHeight: CGFloat = 147
     static let predictionHeight: CGFloat = 191
     static let maximumDrawerHeight: CGFloat = 450
-    static let scrollShadowHeight: CGFloat = 65
+    static let scrollEdgeHeight: CGFloat = 65
+    static let scrollActivationDistance: CGFloat = 24
+    static let scrollBlurRadius: CGFloat = 6
+    static let drawerMinimumScale: CGFloat = 0.95
+    static let positionHoverOutset: CGFloat = 6
     static let statusHeight: CGFloat = 26
     static let collapsedHeight: CGFloat = 404
     static let primary = Color(nsColor: .labelColor)
@@ -39,6 +43,7 @@ enum DesignTokens {
     static let drawerAnimation = Animation.spring(response: 0.38, dampingFraction: 0.88)
     static let numberAnimation = Animation.easeInOut(duration: 0.28)
     static let pressAnimation = Animation.spring(response: 0.22, dampingFraction: 0.72)
+    static let scrollEffectAnimation = Animation.easeOut(duration: 0.16)
 
     static func drawerHeight(positionCount: Int) -> CGFloat {
         let count = max(1, positionCount)
