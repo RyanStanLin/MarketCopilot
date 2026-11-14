@@ -10,7 +10,14 @@
 
 抽屉的逐像素透视与透明渐进模糊使用系统公开的 SwiftUI `layerEffect` 和 Metal，无第三方模糊库或私有 API。构建脚本会在缺少 Metal Toolchain 时自动下载 Apple 官方组件；也可预先运行 `xcodebuild -downloadComponent MetalToolchain`。GitHub Actions 使用同一构建脚本。
 
-从 GitHub 下载源码，或在仓库创建后克隆，再打开 `MarketCopilot.xcodeproj`。选择 MarketCopilot scheme 和 My Mac 后运行；也可以在源码目录运行：
+从 [GitHub 仓库](https://github.com/RyanStanLin/MarketCopilot) 下载源码，或克隆默认 `main` 分支：
+
+```sh
+git clone https://github.com/RyanStanLin/MarketCopilot.git
+cd MarketCopilot
+```
+
+打开 `MarketCopilot.xcodeproj`，选择 MarketCopilot scheme 和 My Mac 后运行；也可以在源码目录运行：
 
 ```sh
 zsh Scripts/build.sh Debug
@@ -31,11 +38,23 @@ zsh Scripts/package-dmg.sh
 
 生成文件位于 `dist/MarketCopilot-<版本>-macOS-<架构>-<commit>.dmg`，同时提供 SHA-256 文件。打开 DMG，将应用拖到 Applications 即可。默认是本地临时签名，不包含 Developer ID 签名或 Apple 公证；正式对外分发时需要自己的开发者证书。
 
-## 每次 push 自动生成安装包
+## CI/CD：自动版本与 DMG Release
 
-[`.github/workflows/build-dmg.yml`](.github/workflows/build-dmg.yml) 监听所有分支和 tag 的每次 push，也支持 Actions 页手动运行。流程在 GitHub 的 `xcode-27` runner 上选择 Xcode 27 或更新版本，编译 Release、创建 DMG，并上传 DMG 与 SHA-256。每次运行独立保留产物，不会因为后续 push 而取消前一次构建。
+[`.github/workflows/build-dmg.yml`](.github/workflows/build-dmg.yml) 监听所有分支和 tag 的每次 push，也支持 Actions 页手动运行。流程在 GitHub 的 `xcode-27` runner 上选择 Xcode 27 或更新版本，编译 Release、创建 DMG，并上传 DMG 与 SHA-256。每次运行独立保留产物，不会因为后续 push 而取消前一次构建。项目默认分支为 `main`。
 
-下载位置：GitHub 仓库 → **Actions** → **Build DMG** → 对应运行 → **Artifacts**。产物保留 30 天；工作流无需配置账户 API 密钥或其他仓库 Secret，不会自动发布 GitHub Release。GitHub runner 和 Actions 版本依据[官方 runner 列表](https://github.com/actions/runner-images)与 [artifact 文档](https://github.com/actions/upload-artifact)配置。
+`main` 构建成功后会自动创建版本标签和 [GitHub Release](https://github.com/RyanStanLin/MarketCopilot/releases)，附 DMG、SHA-256 和自动生成的变更说明；两份附件上传完成后才公开发布。其他分支和 tag 仅保留 Actions 产物，不发布正式 Release。所有构建都从触发该次运行的确切 commit 生成，标签指向同一个 commit。
+
+- 自动版本读取 Xcode 项目的 Release `MARKETING_VERSION`，补丁号加上 `GITHUB_RUN_NUMBER`。当前基准 `1.0.0` 首次生成 `1.0.1`，随后递增；应用内版本、DMG 文件名和 `v1.0.1` 标签一致，`CFBundleVersion` 使用运行序号。
+- 每次新运行分配唯一版本；失败构建或其他分支构建可能留下版本空号。重跑同一次运行保持原版本，已经公开的 Release 附件保持原样，未完成的草稿可继续上传并发布。无需回写版本提交，也不会形成 CI 循环。调整大/小版本时，在 Xcode 的 Release 版本中修改基准值。
+- 正式安装包下载：[Releases / Latest](https://github.com/RyanStanLin/MarketCopilot/releases/latest)。每次构建的临时产物下载：**Actions → Build DMG → 对应运行 → Artifacts**，保留 30 天。
+- 构建任务只有源码读取权限，独立发布任务使用 GitHub 自动提供的短期 `GITHUB_TOKEN` 写入 Release；无需 PAT、Polymarket 账户密钥或额外仓库 Secret。GitHub runner、版本序号和发布行为依据[官方 runner 列表](https://github.com/actions/runner-images)、[Actions 变量](https://docs.github.com/en/actions/reference/workflows-and-actions/variables)和 [Release API](https://docs.github.com/en/rest/releases/releases)配置。
+
+本地构建默认沿用 Xcode 项目中的版本。需要手动指定发行版版本时：
+
+```sh
+MARKETCOPILOT_VERSION=1.2.3 MARKETCOPILOT_BUILD_NUMBER=123 zsh Scripts/build.sh Release
+zsh Scripts/package-dmg.sh
+```
 
 ## 连接账户
 
