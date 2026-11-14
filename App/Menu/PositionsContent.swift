@@ -15,13 +15,15 @@ struct PositionsContent: View {
     private var naturalHeight: CGFloat { 12 + CGFloat(max(1, items.count)) * rowHeight + CGFloat(max(0, items.count - 1)) * 31 }
     private var canScroll: Bool { naturalHeight > viewportHeight + 0.5 }
     private var active: Bool { product == .predictions ? store.isPredictionsExpanded : store.isPerpsExpanded }
+    private var hasSnapshot: Bool { product == .predictions ? store.snapshot.predictions != nil : store.snapshot.perps != nil }
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 LazyVStack(spacing: DesignTokens.rowGap) {
                     if items.isEmpty {
-                        Text("No open positions").font(DesignTokens.caption).foregroundStyle(DesignTokens.secondary)
+                        Text(L10n.text(hasSnapshot ? "No open positions" : "Unavailable"))
+                            .font(DesignTokens.caption).foregroundStyle(DesignTokens.secondary)
                             .frame(maxWidth: .infinity).frame(height: rowHeight)
                     }
                     ForEach(items) { item in
