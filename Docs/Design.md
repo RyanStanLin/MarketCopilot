@@ -27,4 +27,6 @@ The Metal shader varies scale per scanline from 1 to 0.95, using the lower ancho
 
 The scroll viewport spans the full 308 pt drawer. Content retains its 14 pt alignment inset, with an additional 6 pt raster gutter on either side of each card for the hover background. Native horizontal elasticity is disabled and the document width is fixed, preventing sideways trackpad wobble without exposing drawer contents outside the vertical clip.
 
+Vertical scrolling remains enabled for every drawer size. SwiftUI uses `.scrollBounceBehavior(.always, axes: .vertical)` and the native scroll view uses `.verticalScrollElasticity = .allowed`, so a one- or two-position drawer still accepts trackpad momentum and rubber-band overshoot even when its contents fit. Native scrolling handles deceleration and spring-back; no competing drag gesture or synthetic content height is introduced. Overflow alone controls edge effects and keyboard row navigation, independently of vertical bounce.
+
 The 234 pt footer has Cash, its two summaries, an inset separator, two 22 pt health rows, another inset separator, Settings and Quit, plus 8 pt bottom padding. Health labels are 11 pt medium and values 11 pt light. Live metric color is generated from native green/red composited with Secondary Label and fades to each metric's original label style; per-metric controls and duration are persisted.
