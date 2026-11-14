@@ -6,6 +6,8 @@ struct PositionMetric: View {
     let label: LocalizedStringKey
     var alignment: HorizontalAlignment = .leading
     var helpText = ""
+    var number: Decimal?
+    var metric: LiveMetricKind = .now
 
     var body: some View {
         VStack(alignment: alignment, spacing: 0) {
@@ -13,7 +15,7 @@ struct PositionMetric: View {
                 .frame(height: 20).contentTransition(.numericText())
             Text(label).font(DesignTokens.caption).frame(height: 15)
         }
-        .foregroundStyle(DesignTokens.secondary)
+        .liveColor(number, metric: metric)
         .frame(maxWidth: .infinity, alignment: Alignment(horizontal: alignment, vertical: .center))
         .help(helpText.isEmpty ? value : L10n.text(helpText))
         .accessibilityElement(children: .combine)

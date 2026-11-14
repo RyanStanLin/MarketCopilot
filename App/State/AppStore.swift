@@ -11,11 +11,17 @@ final class AppStore {
     var accountName = "Connect account"
     var avatarURL: URL?
     var perpsWebsiteURL = (try? APIConfiguration.bundled())?.perpsWebsite
+    var predictionWebsiteURL = (try? APIConfiguration.bundled())?.predictionWebsite
     var isMenuOpen = false
     var isPerpsExpanded = false
+    var isPredictionsExpanded = false
+    var drawerKeyboardRequest = 0
+    var drawerKeyboardDirection = 1
     var maximumMenuHeight: CGFloat = 760
     var predictionStatus = "Connect your account in Settings."
     var perpsStatus = "Connect your account in Settings."
+    var predictionHealth = DataHealth()
+    var perpsHealth = DataHealth()
     var isRefreshing = false
     var account = AccountConfiguration()
     var accountDraft = AccountConfiguration()
@@ -51,12 +57,18 @@ final class AppStore {
     }
 
     var positions: [PerpPosition] { snapshot.perps?.positions ?? [] }
+    var predictionPositions: [PredictionPosition] { snapshot.predictions?.positions ?? [] }
     var menuHeight: CGFloat {
-        DesignTokens.menuHeight(expanded: isPerpsExpanded, positionCount: positions.count, maximum: maximumMenuHeight)
+        let open = isPerpsExpanded || isPredictionsExpanded
+        return DesignTokens.collapsedHeight - (open ? DesignTokens.separatorHeight : 0)
+            + (isPerpsExpanded ? expandedDrawerHeight : 0)
+            + (isPredictionsExpanded ? expandedPredictionDrawerHeight + 2 : 0)
     }
     var expandedDrawerHeight: CGFloat {
-        DesignTokens.menuHeight(expanded: true, positionCount: positions.count, maximum: maximumMenuHeight)
-            - DesignTokens.collapsedHeight + DesignTokens.separatorHeight
+        min(DesignTokens.drawerHeight(positionCount: positions.count), max(42, maximumMenuHeight - DesignTokens.collapsedHeight + DesignTokens.separatorHeight))
+    }
+    var expandedPredictionDrawerHeight: CGFloat {
+        min(DesignTokens.predictionDrawerHeight(positionCount: predictionPositions.count), max(42, maximumMenuHeight - DesignTokens.collapsedHeight + DesignTokens.separatorHeight - 2))
     }
     var balances: BalancePresentation {
         BalancePresentation(snapshot: snapshot, predictionCashOffset: refreshSettings.predictionCashOffset,
@@ -84,7 +96,20 @@ final class AppStore {
 
     func toggleDrawer() {
         isPerpsExpanded.toggle()
+        if isPerpsExpanded { isPredictionsExpanded = false }
         drawerChanged()
         if isPerpsExpanded { refreshRequested() }
+    }
+
+    func togglePredictionsDrawer() {
+        isPredictionsExpanded.toggle()
+        if isPredictionsExpanded { isPerpsExpanded = false }
+        drawerChanged()
+        if isPredictionsExpanded { refreshRequested() }
+    }
+
+    func navigateDrawer(_ direction: Int) {
+        drawerKeyboardDirection = direction
+        drawerKeyboardRequest &+= 1
     }
 }

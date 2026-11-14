@@ -8,10 +8,10 @@ enum NativeValidation {
     static func run(_ store: AppStore) {
         var checks: [String: Bool] = [:]
         var errors: [String] = []
-        checks["collapsedGeometry"] = DesignTokens.menuHeight(expanded: false, positionCount: 2, maximum: 760) == 327
-        checks["expandedGeometry"] = DesignTokens.menuHeight(expanded: true, positionCount: 2, maximum: 760) == 662
+        checks["collapsedGeometry"] = DesignTokens.menuHeight(expanded: false, positionCount: 2, maximum: 1100) == 404
+        checks["expandedGeometry"] = DesignTokens.menuHeight(expanded: true, positionCount: 3, maximum: 1100) == 843
         checks["drawerClampsToScreen"] = DesignTokens.menuHeight(expanded: true, positionCount: 20, maximum: 700) == 700
-        checks["staticAssetsPresent"] = ["FigmaAvatar", "FigmaUS100", "FigmaNVDA"].allSatisfy { NSImage(named: $0) != nil }
+        checks["staticAssetsPresent"] = ["FigmaAvatar", "FigmaUS100", "FigmaNVDA", "FigmaPrediction"].allSatisfy { NSImage(named: $0) != nil }
         checks["followsSystemAppearance"] = NSApp.appearance == nil
         let lightFill = resolveFill(.aqua)
         let darkFill = resolveFill(.darkAqua)

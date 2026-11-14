@@ -39,7 +39,7 @@ final class MenuMotionValidation {
         let checks: [String: Bool] = [
             "sampledIntermediateFrames": samples.contains { sample in
                 guard let height = sample["windowHeight"] as? CGFloat else { return false }
-                return height > 340 && height < 650
+                return height > 420 && height < 830
             },
             "windowTopAndLeftStayFixed": samples.allSatisfy {
                 abs(($0["windowTop"] as? CGFloat ?? .infinity) - top) <= tolerance
@@ -47,7 +47,7 @@ final class MenuMotionValidation {
             },
             "headerStaysAtTop": samples.allSatisfy {
                 abs($0["headerY"] as? CGFloat ?? .infinity) <= tolerance
-                    && abs(($0["headerHeight"] as? CGFloat ?? .infinity) - 159) <= tolerance
+                    && abs(($0["headerHeight"] as? CGFloat ?? .infinity) - 67) <= tolerance
             },
             "drawerContentStaysBelowParent": samples.allSatisfy {
                 abs(($0["drawerContentY"] as? CGFloat ?? .infinity) - 159) <= tolerance
@@ -56,7 +56,7 @@ final class MenuMotionValidation {
             "cashFollowsClippedViewport": samples.allSatisfy {
                 abs(($0["cashY"] as? CGFloat ?? .infinity) - 159 - ($0["drawerViewportHeight"] as? CGFloat ?? 0)) <= tolerance
             },
-            "reversedAnimationReturnsToCollapsedHeight": abs(panel.frame.height - 327) <= tolerance
+            "reversedAnimationReturnsToCollapsedHeight": abs(panel.frame.height - 404) <= tolerance
         ]
         let passed = checks.values.allSatisfy { $0 }
         do {

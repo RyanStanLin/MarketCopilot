@@ -9,8 +9,8 @@ struct StatusLabel: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            StatusColumn(value: MarketFormat.currency(store.statusPortfolio), title: "Portfolio")
-            StatusColumn(value: MarketFormat.currency(store.statusCash), title: "Cash")
+            StatusColumn(value: MarketFormat.currency(store.statusPortfolio), title: "Portfolio", number: store.statusPortfolio, metric: .portfolio)
+            StatusColumn(value: MarketFormat.currency(store.statusCash), title: "Cash", number: store.statusCash, metric: .cash)
         }
         .foregroundStyle(.primary)
         .fixedSize().scaleEffect(scale)
@@ -22,6 +22,7 @@ struct StatusLabel: View {
         .animation(DesignTokens.numberAnimation, value: store.statusCash)
         .help(store.statusDescription)
         .environment(\.locale, store.locale)
+        .environment(\.liveColorSettings, store.refreshSettings.liveColor)
         .accessibilityElement(children: .combine)
         .transaction { if reduceMotion { $0.disablesAnimations = true } }
     }

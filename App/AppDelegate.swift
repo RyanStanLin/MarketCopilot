@@ -169,6 +169,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self] event in
             guard let self else { return event }
             if event.type == .keyDown && event.keyCode == 53 && self.store.isMenuOpen { self.closeMenu(); return nil }
+            if event.type == .keyDown && self.store.isMenuOpen && [125, 126].contains(event.keyCode) {
+                self.store.navigateDrawer(event.keyCode == 125 ? 1 : -1)
+                return nil
+            }
             if event.type != .keyDown {
                 self.dismissIfOutside(NSEvent.mouseLocation)
             }

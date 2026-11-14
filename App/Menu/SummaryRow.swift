@@ -10,6 +10,7 @@ struct SummaryRow: View {
     var expanded = false
     var helpText = ""
     var hoverID = ""
+    var metric: LiveMetricKind = .cash
 
     var body: some View {
         HStack(spacing: 0) {
@@ -17,9 +18,9 @@ struct SummaryRow: View {
                 HeadIcon(symbol: symbol, highlighted: highlighted)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(MarketFormat.currency(amount)).font(DesignTokens.amount)
-                        .foregroundStyle(DesignTokens.primary)
+                        .liveColor(amount, metric: metric, baseline: DesignTokens.primary)
                         .frame(height: 20).contentTransition(.numericText())
-                    Text(title).font(DesignTokens.caption).foregroundStyle(DesignTokens.secondary).frame(height: 15)
+                    Text(title).font(DesignTokens.caption).frame(height: 15).liveColor(amount, metric: metric)
                 }
             }
             Spacer(minLength: 4)

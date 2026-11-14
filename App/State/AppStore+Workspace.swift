@@ -20,6 +20,8 @@ extension AppStore {
             }
             if let cached {
                 snapshot = cached
+                predictionHealth = DataHealth(updatedAt: cached.predictions?.timestamp, channel: .cache)
+                perpsHealth = DataHealth(updatedAt: cached.perps?.timestamp, channel: .cache)
                 predictionStatus = L10n.text("Cached data — reconnecting.")
                 perpsStatus = L10n.text("Cached data — reconnecting.")
             }
@@ -97,6 +99,7 @@ extension AppStore {
             account = AccountConfiguration(); accountDraft = account
             secretsDraft = AccountSecrets(); activeSecrets = AccountSecrets(); snapshot = PortfolioSnapshot(); quotes = [:]
             accountName = "Connect account"; avatarURL = nil
+            predictionHealth = DataHealth(); perpsHealth = DataHealth()
             predictionStatus = L10n.text("Connect your account in Settings.")
             perpsStatus = predictionStatus
             try repository?.save(account: account, settings: refreshSettings, snapshot: nil, instruments: instruments)

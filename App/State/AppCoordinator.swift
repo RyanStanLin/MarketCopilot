@@ -69,6 +69,8 @@ final class AppCoordinator {
                     self?.controller?.stop()
                     self?.store.predictionStatus = L10n.text("Offline — showing the last valid snapshot.")
                     self?.store.perpsStatus = L10n.text("Offline — showing the last valid snapshot.")
+                    self?.store.predictionHealth.issue = L10n.text("Offline")
+                    self?.store.perpsHealth.issue = L10n.text("Offline")
                 }
             }
         }

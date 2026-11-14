@@ -15,9 +15,12 @@ enum DesignTokens {
     static let headerHeight: CGFloat = 24
     static let separatorHeight: CGFloat = 11
     static let metricHeight: CGFloat = 35
-    static let positionHeight: CGFloat = 141
+    static let positionHeight: CGFloat = 147
+    static let predictionHeight: CGFloat = 191
+    static let maximumDrawerHeight: CGFloat = 450
+    static let scrollShadowHeight: CGFloat = 65
     static let statusHeight: CGFloat = 26
-    static let collapsedHeight: CGFloat = 327
+    static let collapsedHeight: CGFloat = 404
     static let primary = Color(nsColor: .labelColor)
     static let secondary = Color(nsColor: .secondaryLabelColor)
     static let tertiary = Color(nsColor: .tertiaryLabelColor)
@@ -39,7 +42,14 @@ enum DesignTokens {
 
     static func drawerHeight(positionCount: Int) -> CGFloat {
         let count = max(1, positionCount)
-        return 2 + 16 + headerHeight + 12 + CGFloat(count) * positionHeight + CGFloat(count - 1) * rowGap
+        let full = 2 + 16 + headerHeight + 12 + CGFloat(count) * positionHeight + CGFloat(count - 1) * (rowGap * 2 + separatorHeight)
+        return count > 2 ? min(maximumDrawerHeight, full) : full
+    }
+
+    static func predictionDrawerHeight(positionCount: Int) -> CGFloat {
+        let count = max(1, positionCount)
+        let full = 42 + 12 + CGFloat(count) * predictionHeight + CGFloat(count - 1) * (rowGap * 2 + separatorHeight)
+        return count > 2 ? min(maximumDrawerHeight, full) : full
     }
 
     static func menuHeight(expanded: Bool, positionCount: Int, maximum: CGFloat) -> CGFloat {

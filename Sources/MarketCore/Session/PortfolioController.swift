@@ -23,6 +23,7 @@ public final class PortfolioController {
     var lastPerpsPush = Date.distantPast
     var lastMetadata = Date.distantPast
     var lastProfile = Date.distantPast
+    var health: [MarketProduct: DataHealth] = [:]
     var refreshTask: Task<Void, Never>?
     var pollTask: Task<Void, Never>?
     var eventTask: Task<Void, Never>?
@@ -46,6 +47,8 @@ public final class PortfolioController {
         stop()
         guard account.isConfigured else { return }
         self.account = account; self.secrets = secrets; self.settings = settings; snapshot = cached
+        reportHealth(.predictions, updatedAt: cached.predictions?.timestamp, channel: .cache)
+        reportHealth(.perps, updatedAt: cached.perps?.timestamp, channel: .cache)
         onUpdate?(.status(.predictions, L10n.text("Connecting…"))); onUpdate?(.status(.perps, L10n.text("Connecting…")))
         guard automaticallySchedulesUpdates else { return }
         let token = generation
@@ -115,5 +118,15 @@ public final class PortfolioController {
         let date = product == .predictions ? snapshot.predictions?.timestamp : snapshot.perps?.timestamp
         let suffix = date.map { L10n.format(" Last valid update: %@.", $0.formatted(.dateTime.hour().minute().second().locale(L10n.locale))) } ?? ""
         onUpdate?(.status(product, error.localizedDescription + suffix))
+        var state = health[product] ?? DataHealth()
+        state.issue = error.localizedDescription
+        health[product] = state
+        onUpdate?(.health(product, state))
+    }
+
+    func reportHealth(_ product: MarketProduct, updatedAt: Date?, channel: DataHealth.Channel) {
+        let state = DataHealth(updatedAt: updatedAt.map { min($0, clock.now) }, channel: channel)
+        health[product] = state
+        onUpdate?(.health(product, state))
     }
 }

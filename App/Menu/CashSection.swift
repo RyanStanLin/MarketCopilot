@@ -19,6 +19,8 @@ struct CashSection: View {
                            helpText: L10n.text("Available order margin") + "\n" + L10n.text(store.perpsStatus), hoverID: "cashPerps")
             }.padding(.vertical, 6)
             MenuSeparator()
+            DataHealthSection(store: store)
+            MenuSeparator()
             Button(action: store.openSettings) {
                 Text("Settings").font(DesignTokens.action).foregroundStyle(DesignTokens.primary)
                     .frame(maxWidth: .infinity, alignment: .leading).frame(height: 22)
@@ -26,7 +28,14 @@ struct CashSection: View {
             .buttonStyle(PressButtonStyle())
             .menuHover(.action, id: "settings")
             .accessibilityIdentifier("openSettings")
+            Button(action: quit) {
+                Text("Quit MarketCopilot").font(DesignTokens.action).foregroundStyle(DesignTokens.primary)
+                    .frame(maxWidth: .infinity, alignment: .leading).frame(height: 22)
+            }
+            .buttonStyle(PressButtonStyle()).menuHover(.action, id: "quit")
+            .accessibilityIdentifier("quitMarketCopilot")
         }
         .padding(.horizontal, DesignTokens.inset).padding(.bottom, 8)
     }
+    private func quit() { NSApp.terminate(nil) }
 }

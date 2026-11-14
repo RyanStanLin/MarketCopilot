@@ -8,8 +8,14 @@ extension PortfolioController {
             return
         }
         do {
-            let result = try await source.predictions(account: account, credentials: secrets.prediction)
+            var result = try await source.predictions(account: account, credentials: secrets.prediction)
             guard isCurrent(token) else { return }
+            var remaining = Dictionary(result.positions.map { ($0.tokenID, $0) }, uniquingKeysWith: { _, newest in newest })
+            var ordered = (snapshot.predictions?.positions ?? []).compactMap { remaining.removeValue(forKey: $0.tokenID) }
+            for position in result.positions {
+                if let added = remaining.removeValue(forKey: position.tokenID) { ordered.append(added) }
+            }
+            result.positions = ordered
             snapshot.predictions = result; lastPredictionREST = clock.now
             authenticationBlocked.remove(.predictions); retryNotBefore[.predictions] = nil
             onUpdate?(.predictions(result))
@@ -17,6 +23,7 @@ extension PortfolioController {
             let text = result.cash == nil ? L10n.text("Holdings updated · Cash temporarily unavailable; totals include known holdings.")
                 : L10n.format("%@ · Updated %@", L10n.text(transport), result.timestamp.formatted(.dateTime.hour().minute().second().locale(L10n.locale)))
             onUpdate?(.status(.predictions, text))
+            reportHealth(.predictions, updatedAt: result.timestamp, channel: transport == "Polling" ? .polling : .webSocket)
         } catch { failed(error, product: .predictions, token: token) }
     }
 
@@ -36,7 +43,7 @@ extension PortfolioController {
             }
             let result = try await source.perps(credentials: credentials)
             guard isCurrent(token) else { return }
-            acceptPerps(result)
+            acceptPerps(result, channel: .polling)
             lastPerpsREST = clock.now
             authenticationBlocked.remove(.perps); retryNotBefore[.perps] = nil
             let transport = healthySockets.contains("perps") ? "WebSocket" : "Polling"
@@ -66,10 +73,11 @@ extension PortfolioController {
         }
     }
 
-    func acceptPerps(_ value: PerpsSnapshot) {
+    func acceptPerps(_ value: PerpsSnapshot, channel: DataHealth.Channel = .webSocket) {
         guard value.timestamp >= (snapshot.perps?.timestamp ?? .distantPast) else { return }
         let ordered = value.preservingPositionOrder(from: snapshot.perps?.positions ?? [])
         snapshot.perps = ordered; onUpdate?(.perps(ordered))
+        reportHealth(.perps, updatedAt: value.timestamp, channel: channel)
     }
 
     func mergeQuotes(_ updates: [Int: MarketQuote], replaceBook: Bool = false) {

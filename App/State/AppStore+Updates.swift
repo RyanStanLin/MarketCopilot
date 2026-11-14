@@ -14,6 +14,8 @@ extension AppStore {
             avatarURL = value.avatar
         case .status(let product, let text):
             if product == .predictions { predictionStatus = text } else { perpsStatus = text }
+        case .health(let product, let value):
+            if product == .predictions { predictionHealth = value } else { perpsHealth = value }
         case .busy(let busy):
             isRefreshing = busy; isConnecting = busy
             if !busy && account.isConfigured {
