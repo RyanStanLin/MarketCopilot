@@ -37,6 +37,12 @@ The later arrow correction uses the sign of official `unrealized_pnl`, as clarif
 
 Cash offsets were subsequently split into Predictions and Perps values. `BalancePresentation` applies each once to that product's Cash and Portfolio, and both menu sections and status-bar totals consume the same presentation. Raw API snapshots and persisted caches remain unchanged. Legacy combined offset data migrates to Perps; subsequent saves write only the two explicit offsets.
 
+## Updated Figma drawers
+
+The new implementation uses high-fidelity contexts and screenshots for nodes `2:4069` and `10:138`, including the Prediction row, token and shadow child nodes. Full Prediction details were mapped against the official Data API v2 OpenAPI `Position` schema: `current_size`, `avg_price`, `current_price`, `current_value`, `unrealized_pnl`, and `percent_pnl` (a percentage, divided by 100 for the existing ratio formatter). Both products preserve existing position ordering.
+
+The Release build includes the Apple Metal Toolchain and compiles the scanline-dependent drawer shader. New source covers mutually exclusive drawers, keyboard scrolling, conditional edge shadows, health timestamps/channels, tokens, Quit, localized labels and per-metric live color preferences. Updated debug rendering supports both drawer designs and both appearances. At the user's request, no new test execution, native motion sampling, screenshot comparison or live-account acceptance was performed for this redesign; source-derived geometry is not represented as pixel-overlay verification. GitHub creation/push remains deferred.
+
 ## Visual verification limits
 
 The component render uses the exact local Figma avatar/US100/NVDA assets, typography and spacing. Native material is deliberately replaced by a neutral static surface for ImageRenderer, since ImageRenderer cannot composite an AppKit glass view or capture the desktop backdrop. These images verify component layout and assets; they are not represented as live screenshots or proof of final material pixels.

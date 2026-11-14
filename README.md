@@ -8,6 +8,8 @@
 
 需要运行 macOS 27 或更高版本的 Mac，以及 Xcode 27 / Swift 6.4 或更新版本。本机脚本构建当前 Mac 的架构，GitHub Actions 生成 Apple Silicon 安装包。项目不依赖 Homebrew、CocoaPods 或其他第三方 Swift 包。
 
+抽屉的逐像素透视使用原生 Metal。构建脚本会在缺少 Metal Toolchain 时自动下载 Apple 官方组件；也可预先运行 `xcodebuild -downloadComponent MetalToolchain`。GitHub Actions 使用同一构建脚本。
+
 从 GitHub 下载源码，或在仓库创建后克隆，再打开 `MarketCopilot.xcodeproj`。选择 MarketCopilot scheme 和 My Mac 后运行；也可以在源码目录运行：
 
 ```sh
@@ -63,7 +65,9 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 ## 使用与更新
 
 - 菜单栏持续显示两类资产的合计 Portfolio 与合计 Cash。
-- 打开菜单或展开 Perps 抽屉会立即请求最新数据；抽屉中直接显示全部持仓及六项明细。
+- 打开菜单或展开任一抽屉会立即请求最新数据。Predictions 展示市场问题、Yes / No 和平均单价 token、当前份数、价值、收益与百分比、平均价及当前价；Perps 展示 Long / Short 与杠杆 token、收益及六项明细。
+- 两种抽屉按手风琴方式切换，打开 Predictions 会把 Perps 汇总行向下推，菜单顶边保持固定。超过两类持仓时，抽屉最多 450 pt，可使用滚轮、触控板或上下方向键逐项滚动。屏幕空间不足时也会缩小视口并允许滚动。
+- 卡片之间保留设计中的分隔线。滚动到顶部仅显示下方 65 pt 渐变阴影，到底部仅显示上方阴影，中间显示两侧。视口边缘使用每条扫描线不同的 Metal 变换，从 1× 渐变到 0.9×；下方内容锚定顶部、上方内容锚定底部，不对整张卡片统一缩放。减少动态效果开启时取消这项透视。
 - 持仓更新保留已有显示顺序，新持仓追加到底部；关闭后移除。图标固定为 32×32。标题箭头使用官方未实现收益 `unrealized_pnl` 的正负：非负向上、负数向下，随持仓更新切换；点击整张持仓打开 Polymarket Perps。
 - 抽屉使用系统 `.fill.quaternary` 背景，实时适应深浅外观。远程图标先生成完整的固定方形位图；DOGE 这类内嵌 PNG 的简单 SVG 包装会先解包，避免只显示局部图案。
 - General / 通用 → Language / 语言：支持跟随系统、English、简体中文与繁體中文，选择后立即生效并保存。
@@ -74,6 +78,8 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 - 官方 Perps 账户推送约每 5 秒一次；行情推送可以更快，画面合并到最多每秒 4 次，避免数字动画反复打断。
 - 关闭菜单后继续更新；休眠暂停，唤醒和网络恢复后重新同步。断线、限流及凭证过期会在悬停说明和设置中显示，保留最后有效值及时间。
 - General 可设置开机启动、断开账户或退出。断开账户删除本机凭证与对应资产缓存，不影响 Polymarket 账户。
+- 菜单底部 Settings 上方显示两类账户的最近成功更新时间及刷新渠道（WebSocket、Polling、Cache），并标识过期或不可用；悬停可查看完整连接状态。时间依据成功账户快照，连接成功或心跳不会冒充数据更新。菜单底部提供 **Quit MarketCopilot / 退出 MarketCopilot**。
+- **Indicators / 指标 → Live color indicator / 实时变色指示**：总开关与每项独立开关覆盖投资组合、现金、Now、Entry、清算价、头寸、保证金、Funding、收益、收益百分比，以及预测价值、平均价、当前价、份数、杠杆和 token 单价。数值较上次增加时立即闪绿，减少时闪红，数字和相应 caption 一起在设置的 0.1–10 秒内渐变回原色。提示色叠加系统 Secondary Label 色，自动适应深浅模式。首次载入或数值未变时不闪色。
 
 ## 金额口径
 
@@ -104,6 +110,8 @@ Debug 的 `--design-preview` 显式启用 Figma 样例；`--expanded` 展开抽�
 ## Design reference
 
 - [Menu states](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=2-4070)
+- [Updated Perps drawer](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=2-4069)
+- [Prediction drawer](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=10-138)
 - [Head icons](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=1-3545)
 
 实现按原生骨架、设计素材、菜单、设置、Prediction、Perps、实时协调、原生接线和验收分别提交。
