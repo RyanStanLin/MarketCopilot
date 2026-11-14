@@ -12,11 +12,19 @@ jobs:
     name: macOS 27 · Apple Silicon
     runs-on: xcode-27
     timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      artifact_name: MarketCopilot-macOS-arm64-${{ github.sha }}-${{ github.run_number }}
     steps:
       - name: Check out source
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
+
+      - name: Set automatic version
+        id: version
+        run: python3 Scripts/ci-version.py >> "$GITHUB_OUTPUT"
 
       - name: Select Xcode 27 or newer
         shell: bash
@@ -41,7 +49,19 @@ jobs:
           PY
 
       - name: Build Release
+        env:
+          MARKETCOPILOT_VERSION: ${{ steps.version.outputs.version }}
+          MARKETCOPILOT_BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
         run: zsh Scripts/build.sh Release
+
+      - name: Confirm bundle version
+        env:
+          MARKETCOPILOT_VERSION: ${{ steps.version.outputs.version }}
+          MARKETCOPILOT_BUILD_NUMBER: ${{ steps.version.outputs.build_number }}
+        run: |
+          app_info=build/Build/Products/Release/MarketCopilot.app/Contents/Info.plist
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_info")" == "$MARKETCOPILOT_VERSION" ]]
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_info")" == "$MARKETCOPILOT_BUILD_NUMBER" ]]
 
       - name: Create drag-to-install DMG
         run: zsh Scripts/package-dmg.sh
@@ -49,10 +69,37 @@ jobs:
       - name: Upload DMG and checksum
         uses: actions/upload-artifact@v7
         with:
-          name: MarketCopilot-macOS-arm64-${{ github.sha }}
+          name: MarketCopilot-macOS-arm64-${{ github.sha }}-${{ github.run_number }}
           path: |
             dist/*.dmg
             dist/*.dmg.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
+          overwrite: true
+
+  release:
+    name: Publish versioned DMG
+    needs: dmg
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MARKETCOPILOT_VERSION: ${{ needs.dmg.outputs.version }}
+      MARKETCOPILOT_ARTIFACT_NAME: ${{ needs.dmg.outputs.artifact_name }}
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Download this build's DMG
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$MARKETCOPILOT_ARTIFACT_NAME" --dir dist
+
+      - name: Publish GitHub Release
+        run: bash Scripts/publish-release.sh
