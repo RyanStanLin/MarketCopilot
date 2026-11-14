@@ -31,11 +31,11 @@ Indicators: enable Live color indicator, choose individual metrics and set the f
 Use the up/down arrow keys or a trackpad to scroll the expanded drawer.
 
 将 MarketCopilot 拖入 Applications，再从“应用程序”启动。
-点击菜单栏的总资产 / 现金打开菜单，在设置中连接账户。
+点击菜单栏的投资组合 / 现金打开菜单，在设置中连接账户。
 Google / 邮箱的预测市场账户仅需钱包、@用户名或个人主页链接。
 永续合约需要官方委托会话的代理地址与 Secret。
 “通用”中可切换语言，并分别设置预测市场 / 永续合约的正负现金偏移。
-每项偏移同时影响对应账户的现金、总资产，以及菜单栏合计。
+每项偏移同时影响对应账户的现金、投资组合，以及菜单栏合计。
 “指标”中可单独设置各项数值的实时变色提示与渐变时长。
 展开抽屉后可使用上下方向键、滚轮或触控板逐项滚动。
 TEXT

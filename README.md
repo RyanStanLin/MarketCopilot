@@ -8,7 +8,7 @@
 
 需要运行 macOS 27 或更高版本的 Mac，以及 Xcode 27 / Swift 6.4 或更新版本。本机脚本构建当前 Mac 的架构，GitHub Actions 生成 Apple Silicon 安装包。项目不依赖 Homebrew、CocoaPods 或其他第三方 Swift 包。
 
-抽屉的逐像素透视使用原生 Metal。构建脚本会在缺少 Metal Toolchain 时自动下载 Apple 官方组件；也可预先运行 `xcodebuild -downloadComponent MetalToolchain`。GitHub Actions 使用同一构建脚本。
+抽屉的逐像素透视与透明渐进模糊使用系统公开的 SwiftUI `layerEffect` 和 Metal，无第三方模糊库或私有 API。构建脚本会在缺少 Metal Toolchain 时自动下载 Apple 官方组件；也可预先运行 `xcodebuild -downloadComponent MetalToolchain`。GitHub Actions 使用同一构建脚本。
 
 从 GitHub 下载源码，或在仓库创建后克隆，再打开 `MarketCopilot.xcodeproj`。选择 MarketCopilot scheme 和 My Mac 后运行；也可以在源码目录运行：
 
@@ -65,9 +65,10 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 ## 使用与更新
 
 - 菜单栏持续显示两类资产的合计 Portfolio 与合计 Cash。
-- 打开菜单或展开任一抽屉会立即请求最新数据。Predictions 展示市场问题、Yes / No 和平均单价 token、当前份数、价值、收益与百分比、平均价及当前价；Perps 展示 Long / Short 与杠杆 token、收益及六项明细。
+- 打开菜单或展开任一抽屉会立即请求最新数据。Predictions 的 Markets 只展示当前仍有份额的活跃持仓，排除已退出、已结算待赎回和归档市场；展示市场问题、Yes / No 和平均单价 token、当前份数、价值、收益与百分比、平均价及当前价。Perps 展示 Long / Short 与杠杆 token、收益及六项明细。官方组合估值仍独立读取，不因抽屉筛选而被重算。
 - 两种抽屉按手风琴方式切换，打开 Predictions 会把 Perps 汇总行向下推，菜单顶边保持固定。超过两类持仓时，抽屉最多 450 pt，可使用滚轮、触控板或上下方向键逐项滚动。屏幕空间不足时也会缩小视口并允许滚动。
-- 卡片之间保留设计中的分隔线。滚动到顶部仅显示下方 65 pt 渐变阴影，到底部仅显示上方阴影，中间显示两侧。视口边缘使用每条扫描线不同的 Metal 变换，从 1× 渐变到 0.9×；下方内容锚定顶部、上方内容锚定底部，不对整张卡片统一缩放。减少动态效果开启时取消这项透视。
+- 卡片之间保留设计中的分隔线。滚动到顶部仅保留下方 65 pt 透明渐进模糊，到底部仅保留上方，中间两侧都有；没有灰色阴影遮罩。模糊半径和透明度逐像素变化，逐渐露出原生 quaternary 背景。视口边缘使用每条扫描线不同的 Metal 变换，从 1× 平滑过渡到 0.95×；下方内容锚定顶部、上方内容锚定底部，不对整张卡片统一缩放。边缘效果同时随离开端点的滚动距离连续增强，24 pt 内缓入，并以 0.16 秒动画平滑衔接，到达端点时缓出。减少动态效果开启时取消透视，保留模糊。
+- 抽屉固定文档宽度并通过公开 AppKit API 关闭横向弹性，触控板横扫不会让内容左右回弹。滚动视口延伸至抽屉全宽，卡片两侧保留 hover 所需空间；圆角背景完整呈现，垂直裁剪仍限制在抽屉内部。
 - 持仓更新保留已有显示顺序，新持仓追加到底部；关闭后移除。图标固定为 32×32。标题箭头使用官方未实现收益 `unrealized_pnl` 的正负：非负向上、负数向下，随持仓更新切换；点击整张持仓打开 Polymarket Perps。
 - 抽屉使用系统 `.fill.quaternary` 背景，实时适应深浅外观。远程图标先生成完整的固定方形位图；DOGE 这类内嵌 PNG 的简单 SVG 包装会先解包，避免只显示局部图案。
 - General / 通用 → Language / 语言：支持跟随系统、English、简体中文与繁體中文，选择后立即生效并保存。
