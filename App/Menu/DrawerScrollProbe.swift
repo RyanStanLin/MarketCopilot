@@ -3,23 +3,26 @@ import AppKit
 final class DrawerScrollProbe: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        lockHorizontalAxis()
+        configureScrolling()
     }
 
     override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
-        lockHorizontalAxis()
+        configureScrolling()
     }
 
     override func layout() {
         super.layout()
-        lockHorizontalAxis()
+        configureScrolling()
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
-    func lockHorizontalAxis() {
+    func configureScrolling() {
         guard let scrollView = enclosingScrollView else { return }
+        // Keep trackpad events on NSScrollView's native momentum / rubber-band path,
+        // including when one or two positions fit without a scrollable range.
+        if scrollView.verticalScrollElasticity != .allowed { scrollView.verticalScrollElasticity = .allowed }
         if scrollView.horizontalScrollElasticity != .none { scrollView.horizontalScrollElasticity = .none }
         if scrollView.hasHorizontalScroller { scrollView.hasHorizontalScroller = false }
         if !scrollView.usesPredominantAxisScrolling { scrollView.usesPredominantAxisScrolling = true }

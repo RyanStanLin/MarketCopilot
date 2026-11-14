@@ -13,7 +13,7 @@ struct PositionsContent: View {
     }
     private var rowHeight: CGFloat { product == .predictions ? DesignTokens.predictionHeight : DesignTokens.positionHeight }
     private var naturalHeight: CGFloat { 12 + CGFloat(max(1, items.count)) * rowHeight + CGFloat(max(0, items.count - 1)) * 31 }
-    private var canScroll: Bool { naturalHeight > viewportHeight + 0.5 }
+    private var hasOverflow: Bool { naturalHeight > viewportHeight + 0.5 }
     private var active: Bool { product == .predictions ? store.isPredictionsExpanded : store.isPerpsExpanded }
     private var hasSnapshot: Bool {
         if product == .perps { return store.snapshot.perps != nil }
@@ -43,15 +43,15 @@ struct PositionsContent: View {
                             // Include the complete rounded hover background in the raster layer.
                             .padding(.horizontal, DesignTokens.positionHoverOutset)
                             .modifier(DrawerReelEffect(viewportHeight: viewportHeight,
-                                topStrength: canScroll ? scroll.topStrength : 0,
-                                bottomStrength: canScroll ? scroll.bottomStrength : 0))
+                                topStrength: hasOverflow ? scroll.topStrength : 0,
+                                bottomStrength: hasOverflow ? scroll.bottomStrength : 0))
                             .animation(DesignTokens.scrollEffectAnimation, value: scroll.topStrength)
                             .animation(DesignTokens.scrollEffectAnimation, value: scroll.bottomStrength)
                             if item.id != items.last?.id {
                                 MenuSeparator().padding(.horizontal, DesignTokens.positionHoverOutset)
                                     .modifier(DrawerReelEffect(viewportHeight: viewportHeight,
-                                        topStrength: canScroll ? scroll.topStrength : 0,
-                                        bottomStrength: canScroll ? scroll.bottomStrength : 0))
+                                        topStrength: hasOverflow ? scroll.topStrength : 0,
+                                        bottomStrength: hasOverflow ? scroll.bottomStrength : 0))
                                     .animation(DesignTokens.scrollEffectAnimation, value: scroll.topStrength)
                                     .animation(DesignTokens.scrollEffectAnimation, value: scroll.bottomStrength)
                             }
@@ -65,7 +65,8 @@ struct PositionsContent: View {
                 .id(product.rawValue + "-start")
                 .background(DrawerScrollAxisLock())
             }
-            .scrollIndicators(.never).scrollDisabled(!canScroll).scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.never)
+            .scrollBounceBehavior(.always, axes: .vertical)
             .onScrollGeometryChange(for: DrawerScrollState.self) { geometry in
                 let offset = max(0, geometry.contentOffset.y + geometry.contentInsets.top)
                 let extent = max(0, geometry.contentSize.height + geometry.contentInsets.top
@@ -78,7 +79,7 @@ struct PositionsContent: View {
             }
             .onChange(of: items.map(\.id)) { keyboardIndex = nil }
             .onChange(of: store.drawerKeyboardRequest) {
-                guard active, canScroll, !items.isEmpty else { return }
+                guard active, hasOverflow, !items.isEmpty else { return }
                 let current = keyboardIndex ?? Int((scroll.offset / (rowHeight + 31)).rounded())
                 let next = min(max(0, current + store.drawerKeyboardDirection), max(0, items.count - 2))
                 keyboardIndex = next

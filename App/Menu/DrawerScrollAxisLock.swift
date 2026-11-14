@@ -1,10 +1,10 @@
 import SwiftUI
 
-/// Configures just the drawer's enclosing native scroll view.
+/// Keeps native vertical momentum and bounce while locking the horizontal axis.
 struct DrawerScrollAxisLock: NSViewRepresentable {
     func makeNSView(context: Context) -> DrawerScrollProbe { DrawerScrollProbe() }
 
     func updateNSView(_ nsView: DrawerScrollProbe, context: Context) {
-        nsView.lockHorizontalAxis()
+        nsView.configureScrolling()
     }
 }
