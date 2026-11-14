@@ -28,11 +28,11 @@ public struct PredictionClient: Sendable {
         var cursor: String?
         repeat {
             var query = [URLQueryItem(name: "user", value: wallet), .init(name: "status", value: "OPEN"),
-                         .init(name: "include_archived", value: "true")]
+                         .init(name: "include_archived", value: "false")]
             if let cursor { query.append(.init(name: "cursor", value: cursor)) }
             else { query.append(.init(name: "limit", value: "1000")) }
             let page = try await http.get(PredictionWire.PositionPage.self, base: configuration.data, path: "/v2/positions", query: query)
-            values.append(contentsOf: page.data.map(\.position))
+            values.append(contentsOf: page.data.map(\.position).filter(\.isActive))
             cursor = page.pagination.nextCursor
             if page.pagination.hasMore {
                 guard let cursor, !cursor.isEmpty, visited.insert(cursor).inserted else {

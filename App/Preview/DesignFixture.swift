@@ -18,7 +18,8 @@ enum DesignFixture {
             predictions: PredictionSnapshot(holdingsValue: 5.03, cash: 2.98, positions: (0..<2).map { index in
                 PredictionPosition(tokenID: "design-\(index)", conditionID: "design", title: "Will Jon Ossoff win the 2028 Democratic presidential nomination?",
                     outcome: "Yes", outcomeIndex: 0, shares: 523_508.1, averagePrice: 0.04, currentPrice: 0.261,
-                    currentValue: 136_373.86, unrealizedPnl: 115_356.58, returnOnEquity: 5.4887)
+                    currentValue: 136_373.86, unrealizedPnl: 115_356.58, returnOnEquity: 5.4887,
+                    status: "OPEN", isArchived: false, isRedeemable: false)
             }),
             perps: PerpsSnapshot(portfolio: 17.72, cash: 0.02, positions: [position, nvda, third]))
         store.maximumMenuHeight = 1100

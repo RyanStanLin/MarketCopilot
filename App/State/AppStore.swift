@@ -57,7 +57,7 @@ final class AppStore {
     }
 
     var positions: [PerpPosition] { snapshot.perps?.positions ?? [] }
-    var predictionPositions: [PredictionPosition] { snapshot.predictions?.positions ?? [] }
+    var predictionPositions: [PredictionPosition] { snapshot.predictions?.positions.filter(\.isActive) ?? [] }
     var menuHeight: CGFloat {
         let open = isPerpsExpanded || isPredictionsExpanded
         return DesignTokens.collapsedHeight - (open ? DesignTokens.separatorHeight : 0)

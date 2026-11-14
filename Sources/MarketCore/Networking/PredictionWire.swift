@@ -24,17 +24,21 @@ enum PredictionWire {
         let percent_pnl: APIAmount?
         let event_slug: String?
         let slug: String?
+        let status: String?
+        let archived: Bool?
+        let redeemable: Bool?
         enum CodingKeys: String, CodingKey {
             case tokenID = "token_id", conditionID = "condition_id"
             case title, icon, outcome, outcome_index, current_size, avg_price, current_price, current_value
-            case unrealized_pnl, percent_pnl, event_slug, slug
+            case unrealized_pnl, percent_pnl, event_slug, slug, status, archived, redeemable
         }
         var position: PredictionPosition {
             PredictionPosition(tokenID: tokenID, conditionID: conditionID, title: title,
                 icon: icon.flatMap(URL.init(string:)), outcome: outcome, outcomeIndex: outcome_index,
                 shares: current_size?.value, averagePrice: avg_price?.value, currentPrice: current_price?.value,
                 currentValue: current_value?.value, unrealizedPnl: unrealized_pnl?.value,
-                returnOnEquity: percent_pnl.map { $0.value / 100 }, eventSlug: event_slug, slug: slug)
+                returnOnEquity: percent_pnl.map { $0.value / 100 }, eventSlug: event_slug, slug: slug,
+                status: status, isArchived: archived, isRedeemable: redeemable)
         }
     }
     struct Pagination: Decodable, Sendable {
