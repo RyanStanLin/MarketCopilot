@@ -43,15 +43,13 @@ struct PositionsContent: View {
                             // Include the complete rounded hover background in the raster layer.
                             .padding(.horizontal, DesignTokens.positionHoverOutset)
                             .modifier(DrawerReelEffect(viewportHeight: viewportHeight,
-                                topStrength: hasOverflow ? scroll.topStrength : 0,
-                                bottomStrength: hasOverflow ? scroll.bottomStrength : 0))
+                                topStrength: scroll.topStrength, bottomStrength: scroll.bottomStrength))
                             .animation(DesignTokens.scrollEffectAnimation, value: scroll.topStrength)
                             .animation(DesignTokens.scrollEffectAnimation, value: scroll.bottomStrength)
                             if item.id != items.last?.id {
                                 MenuSeparator().padding(.horizontal, DesignTokens.positionHoverOutset)
                                     .modifier(DrawerReelEffect(viewportHeight: viewportHeight,
-                                        topStrength: hasOverflow ? scroll.topStrength : 0,
-                                        bottomStrength: hasOverflow ? scroll.bottomStrength : 0))
+                                        topStrength: scroll.topStrength, bottomStrength: scroll.bottomStrength))
                                     .animation(DesignTokens.scrollEffectAnimation, value: scroll.topStrength)
                                     .animation(DesignTokens.scrollEffectAnimation, value: scroll.bottomStrength)
                             }
@@ -68,11 +66,10 @@ struct PositionsContent: View {
             .scrollIndicators(.never)
             .scrollBounceBehavior(.always, axes: .vertical)
             .onScrollGeometryChange(for: DrawerScrollState.self) { geometry in
-                let offset = max(0, geometry.contentOffset.y + geometry.contentInsets.top)
+                let offset = geometry.contentOffset.y + geometry.contentInsets.top
                 let extent = max(0, geometry.contentSize.height + geometry.contentInsets.top
                     + geometry.contentInsets.bottom - geometry.containerSize.height)
-                let remaining = max(0, extent - offset)
-                return DrawerScrollState(offset: offset, remaining: remaining)
+                return DrawerScrollState(offset: offset, extent: extent)
             } action: { _, value in scroll = value }
             .onScrollPhaseChange { _, phase in
                 if phase == .interacting || phase == .tracking || phase == .decelerating { keyboardIndex = nil }
@@ -80,7 +77,7 @@ struct PositionsContent: View {
             .onChange(of: items.map(\.id)) { keyboardIndex = nil }
             .onChange(of: store.drawerKeyboardRequest) {
                 guard active, hasOverflow, !items.isEmpty else { return }
-                let current = keyboardIndex ?? Int((scroll.offset / (rowHeight + 31)).rounded())
+                let current = keyboardIndex ?? Int((scroll.navigationOffset / (rowHeight + 31)).rounded())
                 let next = min(max(0, current + store.drawerKeyboardDirection), max(0, items.count - 2))
                 keyboardIndex = next
                 withAnimation(reduceMotion ? nil : DesignTokens.drawerAnimation) {
