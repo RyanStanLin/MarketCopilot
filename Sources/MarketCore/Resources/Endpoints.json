@@ -7,6 +7,7 @@
   "predictionUserSocket": "wss://ws-subscriptions-clob.polymarket.com/ws/user",
   "perpsSocket": "wss://ws.perpetuals.polymarket.com/v1/ws",
   "perpsWebsite": "https://polymarket.com/perps",
+  "predictionWebsite": "https://polymarket.com/event",
   "polygonRPC": "https://polygon.drpc.org",
   "polygonChainID": 137,
   "predictionCollateral": "0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB",

@@ -32,7 +32,7 @@ public struct PredictionClient: Sendable {
             if let cursor { query.append(.init(name: "cursor", value: cursor)) }
             else { query.append(.init(name: "limit", value: "1000")) }
             let page = try await http.get(PredictionWire.PositionPage.self, base: configuration.data, path: "/v2/positions", query: query)
-            values.append(contentsOf: page.data.map { PredictionPosition(tokenID: $0.tokenID, conditionID: $0.conditionID) })
+            values.append(contentsOf: page.data.map(\.position))
             cursor = page.pagination.nextCursor
             if page.pagination.hasMore {
                 guard let cursor, !cursor.isEmpty, visited.insert(cursor).inserted else {

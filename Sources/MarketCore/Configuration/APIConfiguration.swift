@@ -9,6 +9,7 @@ public struct APIConfiguration: Codable, Sendable {
     public let predictionUserSocket: URL
     public let perpsSocket: URL
     public let perpsWebsite: URL
+    public let predictionWebsite: URL
     public let polygonRPC: URL
     public let polygonChainID: Int
     public let predictionCollateral: String
