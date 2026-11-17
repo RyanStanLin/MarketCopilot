@@ -42,7 +42,9 @@ extension AppStore {
 
     func refreshAlertPermission() async {
         guard !isDesignPreview else { return }
+        let previous = alertPermission
         alertPermission = await alertNotifications.permission()
+        if alertPermission.allowsNotifications && (previous == .denied || previous == .notDetermined) { resetAlertMonitoring() }
     }
 
     func requestAlertPermission() async -> Bool {
@@ -51,7 +53,10 @@ extension AppStore {
         defer { isRequestingAlertPermission = false }
         alertPermission = await alertNotifications.permission()
         if alertPermission.allowsNotifications { return true }
-        do { alertPermission = try await alertNotifications.requestPermission() }
+        do {
+            alertPermission = try await alertNotifications.requestPermission()
+            if alertPermission.allowsNotifications { resetAlertMonitoring() }
+        }
         catch { alertNotice = error.localizedDescription; return false }
         if !alertPermission.allowsNotifications { alertNotice = AlertDeliveryError.permissionDenied.localizedDescription }
         return alertPermission.allowsNotifications

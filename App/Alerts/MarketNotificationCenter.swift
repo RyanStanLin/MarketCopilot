@@ -51,6 +51,12 @@ final class MarketNotificationCenter: NSObject, UNUserNotificationCenterDelegate
         try await center.add(UNNotificationRequest(identifier: "market-alert-test", content: content, trigger: nil))
     }
 
+    func cancel(eventID: UUID) {
+        let id = "market-alert-\(eventID)"
+        center.removePendingNotificationRequests(withIdentifiers: [id])
+        center.removeDeliveredNotifications(withIdentifiers: [id])
+    }
+
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                                             withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .list, .sound])

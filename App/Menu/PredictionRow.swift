@@ -64,5 +64,5 @@ struct PredictionRow: View {
     }
 
     private func openPosition() { if let destination { openURL(destination) } }
-    private func configureNotifications() { store.openAlertSettings(store.alertTarget(for: position)) }
+    private func configureNotifications() { store.openAlertSettings(store.alertTarget(for: position), nil) }
 }

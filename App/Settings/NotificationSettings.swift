@@ -12,7 +12,7 @@ struct NotificationSettings: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(store.alertRules) { rule in
-                    AlertRuleRow(store: store, rule: rule, showTarget: true) { store.openAlertSettings(rule.target) }
+                    AlertRuleRow(store: store, rule: rule, showTarget: true) { store.openAlertSettings(rule.target, rule.id) }
                 }
             }
             Section {

@@ -26,7 +26,8 @@ extension AlertObservation {
             values[.price] = AlertReading(mark, at: quote.timestamp)
             if let liquidation = position.liquidationPrice, liquidation > 0 {
                 let distance = position.isLong ? mark - liquidation : liquidation - mark
-                values[.liquidationBuffer] = AlertReading(max(0, distance / mark * 100), at: min(quote.timestamp, snapshot.timestamp))
+                values[.liquidationBuffer] = AlertReading(max(0, distance / mark * 100),
+                    at: max(quote.timestamp, snapshot.timestamp), dependingOn: min(quote.timestamp, snapshot.timestamp))
             }
         }
         return Self(targetID: target.id, readings: values)

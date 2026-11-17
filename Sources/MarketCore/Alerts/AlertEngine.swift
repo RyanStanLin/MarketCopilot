@@ -32,7 +32,8 @@ public struct AlertEngine: Sendable {
     private mutating func evaluate(_ rule: MarketAlertRule, reading: AlertReading,
                                   now: Date, maximumGap: TimeInterval) -> AlertEvent? {
         guard !reading.value.isNaN, maximumGap.isFinite, maximumGap > 0,
-              (-5...maximumGap).contains(now.timeIntervalSince(reading.timestamp)) else { return nil }
+              (-5...maximumGap).contains(now.timeIntervalSince(reading.timestamp)),
+              (-5...maximumGap).contains(now.timeIntervalSince(reading.freshnessTimestamp)) else { return nil }
         var state = states.removeValue(forKey: rule.id) ?? AlertEvaluationState(revision: rule.revision)
         defer { states[rule.id] = state }
         if state.revision != rule.revision { state = AlertEvaluationState(revision: rule.revision) }

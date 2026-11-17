@@ -8,6 +8,11 @@ struct AlertRulesWindow: View {
     @State private var newDraftID = UUID()
     private var rules: [MarketAlertRule] { store.alertRules.filter { $0.target.id == target.id } }
 
+    init(store: AppStore, target: AlertTarget, selectedRuleID: UUID? = nil) {
+        self.store = store; self.target = target
+        _selection = State(initialValue: selectedRuleID)
+    }
+
     var body: some View {
         NavigationSplitView {
             VStack(spacing: 0) {

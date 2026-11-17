@@ -39,7 +39,7 @@ final class AppStore {
     let isDesignPreview: Bool
 
     @ObservationIgnored var openSettings: () -> Void = {}
-    @ObservationIgnored var openAlertSettings: (AlertTarget) -> Void = { _ in }
+    @ObservationIgnored var openAlertSettings: (AlertTarget, UUID?) -> Void = { _, _ in }
     @ObservationIgnored var alertRulesChanged: () -> Void = {}
     @ObservationIgnored let alertNotifications = MarketNotificationCenter()
     @ObservationIgnored var alertEngine = AlertEngine()

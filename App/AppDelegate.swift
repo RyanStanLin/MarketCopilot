@@ -25,7 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.setAccessibilityLabel(MarketCore.name)
         statusItem = item
         store.openSettings = { [weak self] in self?.showSettings() }
-        store.openAlertSettings = { [weak self] target in self?.showAlertSettings(target: target) }
+        store.openAlertSettings = { [weak self] target, ruleID in self?.showAlertSettings(target: target, selectedRuleID: ruleID) }
         store.displayPreferencesChanged = { [weak self] in
             self?.settingsWindow?.title = L10n.text("MarketCopilot Settings")
             self?.alertWindow?.title = L10n.text("Position alerts")
@@ -116,13 +116,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !store.isMenuOpen { toggleMenu() }
     }
 
-    private func showAlertSettings(target: AlertTarget) {
+    private func showAlertSettings(target: AlertTarget, selectedRuleID: UUID?) {
         closeMenu()
         let window = alertWindow ?? NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 720),
             styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         if alertWindow == nil { window.isReleasedWhenClosed = false; window.center() }
         window.title = L10n.text("Position alerts")
-        window.contentView = NSHostingView(rootView: AlertRulesWindow(store: store, target: target))
+        window.contentView = NSHostingView(rootView: AlertRulesWindow(store: store, target: target, selectedRuleID: selectedRuleID))
         alertWindow = window
         NSApp.activate(); window.makeKeyAndOrderFront(nil)
     }

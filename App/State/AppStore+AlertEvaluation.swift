@@ -3,7 +3,7 @@ import MarketCore
 
 extension AppStore {
     func resetAlertMonitoring() {
-        for task in alertDeliveryTasks.values { task.cancel() }
+        for (id, task) in alertDeliveryTasks { task.cancel(); alertNotifications.cancel(eventID: id) }
         alertDeliveryTasks = [:]; pendingAlertEvents = [:]
         liveAlertQuoteIDs = []; alertEngine.reset()
         updateAlertWarmup()
@@ -12,6 +12,7 @@ extension AppStore {
     func cancelAlertDelivery(ruleID: UUID) {
         if let eventID = pendingAlertEvents.removeValue(forKey: ruleID) {
             alertDeliveryTasks.removeValue(forKey: eventID)?.cancel()
+            alertNotifications.cancel(eventID: eventID)
         }
     }
 
@@ -39,6 +40,7 @@ extension AppStore {
     }
 
     private func dispatchAlert(_ event: AlertEvent) {
+        guard pendingAlertEvents[event.rule.id] == nil else { alertEngine.acknowledge(event); return }
         pendingAlertEvents[event.rule.id] = event.id
         alertDeliveryTasks[event.id] = Task { [weak self] in
             guard let self else { return }
@@ -52,7 +54,10 @@ extension AppStore {
                 try Task.checkCancellation()
                 try await self.alertNotifications.deliver(event)
                 guard !Task.isCancelled, self.isCurrentAlert(event),
-                      let index = self.alertRules.firstIndex(where: { $0.id == event.rule.id }) else { return }
+                      let index = self.alertRules.firstIndex(where: { $0.id == event.rule.id }) else {
+                    self.alertNotifications.cancel(eventID: event.id)
+                    return
+                }
                 var updated = self.alertRules
                 updated[index].lastTriggeredAt = .now
                 if !updated[index].repeats { updated[index].isEnabled = false }
