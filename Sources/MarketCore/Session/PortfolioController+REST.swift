@@ -48,11 +48,19 @@ extension PortfolioController {
             authenticationBlocked.remove(.perps); retryNotBefore[.perps] = nil
             let transport = healthySockets.contains("perps") ? "WebSocket" : "Polling"
             onUpdate?(.status(.perps, L10n.format("%@ · Updated %@", L10n.text(transport), result.timestamp.formatted(.dateTime.hour().minute().second().locale(L10n.locale)))))
-            if drawerExpanded {
-                let quotes = try await source.quotes(instrumentIDs: Set(result.positions.map(\.id)))
-                guard isCurrent(token) else { return }
-                mergeQuotes(quotes, replaceBook: true); onUpdate?(.quotes(quoteCache))
-            }
+        } catch { failed(error, product: .perps, token: token) }
+    }
+
+    func refreshQuotes(token: UUID, force: Bool) async {
+        let ids = requestedQuoteIDs
+        let interval = healthySockets.contains("perpsQuotes") ? settings.reconciliationInterval : settings.pollingInterval
+        guard isCurrent(token), perpsValidated, !ids.isEmpty,
+              mayRefresh(.perps, force: force, last: lastQuoteREST, interval: interval) else { return }
+        do {
+            let quotes = try await source.quotes(instrumentIDs: ids)
+            guard isCurrent(token) else { return }
+            lastQuoteREST = clock.now
+            mergeQuotes(quotes, replaceBook: true); onUpdate?(.quotes(quoteCache))
         } catch { failed(error, product: .perps, token: token) }
     }
 

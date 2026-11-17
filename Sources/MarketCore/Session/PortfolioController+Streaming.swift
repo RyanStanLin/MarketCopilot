@@ -20,8 +20,8 @@ extension PortfolioController {
                !authenticationBlocked.contains(.perps) {
                 ensureSocket("perps", signature: "account", product: .perps,
                              subscription: try .perps(configuration: configuration, credentials: credentials, instrumentIDs: []))
-                let ids = snapshot.perps?.positions.map(\.id).sorted() ?? []
-                if drawerExpanded && !ids.isEmpty {
+                let ids = requestedQuoteIDs.sorted()
+                if !ids.isEmpty {
                     ensureSocket("perpsQuotes", signature: ids.map(String.init).joined(separator: ","), product: .perps,
                                  subscription: try .perpsMarket(configuration: configuration, instrumentIDs: ids))
                 } else { cancelSocket("perpsQuotes") }

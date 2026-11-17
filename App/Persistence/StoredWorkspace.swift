@@ -9,6 +9,7 @@ final class StoredWorkspace {
     var snapshotData: Data?
     var snapshotIdentity: String
     var instrumentData: Data?
+    var alertRuleData: Data?
 
     init(accountData: Data, refreshData: Data) {
         id = "workspace"; self.accountData = accountData; self.refreshData = refreshData

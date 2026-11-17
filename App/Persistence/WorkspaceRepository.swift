@@ -37,4 +37,23 @@ final class WorkspaceRepository {
         record.instrumentData = try encoder.encode(instruments)
         try context.save()
     }
+
+    func loadAlerts() throws -> [MarketAlertRule] {
+        guard let data = try context.fetch(FetchDescriptor<StoredWorkspace>()).first?.alertRuleData else { return [] }
+        return try JSONDecoder().decode([MarketAlertRule].self, from: data).map { try $0.validated() }
+    }
+
+    func saveAlerts(_ rules: [MarketAlertRule]) throws {
+        let records = try context.fetch(FetchDescriptor<StoredWorkspace>())
+        let encoder = JSONEncoder()
+        let record: StoredWorkspace
+        if let existing = records.first { record = existing }
+        else {
+            record = StoredWorkspace(accountData: try encoder.encode(AccountConfiguration()),
+                                     refreshData: try encoder.encode(RefreshSettings()))
+            context.insert(record)
+        }
+        record.alertRuleData = try encoder.encode(rules)
+        try context.save()
+    }
 }

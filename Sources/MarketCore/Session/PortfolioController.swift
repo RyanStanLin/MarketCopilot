@@ -15,6 +15,7 @@ public final class PortfolioController {
     var settings = RefreshSettings()
     var generation = UUID()
     var drawerExpanded = false
+    var alertInstrumentIDs = Set<Int>()
     var perpsValidated = false
     var authenticationBlocked = Set<MarketProduct>()
     var retryNotBefore: [MarketProduct: Date] = [:]
@@ -22,6 +23,7 @@ public final class PortfolioController {
     var lastPerpsREST = Date.distantPast
     var lastPerpsPush = Date.distantPast
     var lastMetadata = Date.distantPast
+    var lastQuoteREST = Date.distantPast
     var lastProfile = Date.distantPast
     var health: [MarketProduct: DataHealth] = [:]
     var refreshTask: Task<Void, Never>?
@@ -69,6 +71,7 @@ public final class PortfolioController {
         for task in socketTasks.values { task.cancel() }
         socketTasks = [:]; socketSignatures = [:]; healthySockets = []; streamParsers = [:]
         quoteCache = [:]; authenticationBlocked = []; retryNotBefore = [:]
+        alertInstrumentIDs = []; lastQuoteREST = .distantPast
         perpsValidated = false; account = nil
         lastPredictionREST = .distantPast; lastPerpsREST = .distantPast
         lastPerpsPush = .distantPast
@@ -79,6 +82,17 @@ public final class PortfolioController {
     public func setDrawerExpanded(_ expanded: Bool) {
         drawerExpanded = expanded
         configureSockets()
+    }
+
+    public func setAlertInstrumentIDs(_ ids: Set<Int>) {
+        guard ids != alertInstrumentIDs else { return }
+        alertInstrumentIDs = ids
+        configureSockets()
+    }
+
+    var requestedQuoteIDs: Set<Int> {
+        let held = Set(snapshot.perps?.positions.map(\.id) ?? [])
+        return drawerExpanded ? held : held.intersection(alertInstrumentIDs)
     }
 
     public func refresh(force: Bool = true) async {
@@ -92,6 +106,7 @@ public final class PortfolioController {
             async let perps: Void = self.refreshPerps(token: token, force: force)
             async let metadata: Void = self.refreshMetadata(token: token, force: force)
             _ = await (predictions, perps, metadata)
+            await self.refreshQuotes(token: token, force: force)
         }
         refreshTask = task
         await task.value

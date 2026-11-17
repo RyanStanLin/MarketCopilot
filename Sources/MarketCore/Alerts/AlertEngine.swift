@@ -53,8 +53,8 @@ public struct AlertEngine: Sendable {
         guard condition, previousCondition != true,
               hadPrevious || rule.trigger == .nearLiquidation || rule.trigger.isRapidMove,
               state.pendingEvent == nil else { return nil }
-        if let last = rule.lastTriggeredAt {
-            guard rule.repeats, now.timeIntervalSince(last) >= rule.cooldownSeconds else { return nil }
+        if let last = rule.lastTriggeredAt, rule.repeats {
+            guard now.timeIntervalSince(last) >= rule.cooldownSeconds else { return nil }
         }
         let event = AlertEvent(rule: rule, value: value, timestamp: reading.timestamp)
         state.pendingEvent = event.id

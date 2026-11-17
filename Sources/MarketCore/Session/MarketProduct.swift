@@ -1,3 +1,3 @@
-public enum MarketProduct: String, Hashable, Sendable {
+public enum MarketProduct: String, Codable, Hashable, Sendable {
     case predictions, perps
 }
