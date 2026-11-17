@@ -58,6 +58,7 @@
 			<array>
 				<string>Info.plist</string>
 				<string>MarketCopilot.entitlements</string>
+				<string>MarketCopilot-TimeSensitive.entitlements</string>
 			</array>
 		</dict>
 		<key>000000000000000000000007</key>

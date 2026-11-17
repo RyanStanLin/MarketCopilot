@@ -54,7 +54,7 @@ extension AppStore {
             do {
                 guard self.isCurrentAlert(event) else { return }
                 try Task.checkCancellation()
-                try await self.alertNotifications.deliver(event)
+                try await self.alertNotifications.deliver(event, timeSensitive: self.refreshSettings.timeSensitiveNotifications)
                 guard !Task.isCancelled, self.isCurrentAlert(event),
                       let index = self.alertRules.firstIndex(where: { $0.id == event.rule.id }) else {
                     self.alertNotifications.cancel(eventID: event.id)

@@ -1,35 +1,53 @@
 import AppKit
 import MarketCore
+import Security
 import UserNotifications
 
 @MainActor
 final class MarketNotificationCenter: NSObject, UNUserNotificationCenterDelegate {
     private let center = UNUserNotificationCenter.current()
+    private let hasTimeSensitiveEntitlement: Bool
 
     override init() {
+        if let task = SecTaskCreateFromSelf(nil) {
+            hasTimeSensitiveEntitlement = SecTaskCopyValueForEntitlement(
+                task, "com.apple.developer.usernotifications.time-sensitive" as CFString, nil
+            ) as? Bool == true
+        } else {
+            hasTimeSensitiveEntitlement = false
+        }
         super.init()
         center.delegate = self
     }
 
-    func permission() async -> AlertPermission {
+    func access() async -> AlertNotificationAccess {
         let settings = await center.notificationSettings()
-        switch settings.authorizationStatus {
-        case .notDetermined: return .notDetermined
-        case .denied: return .denied
-        case .authorized: return .authorized
-        case .provisional: return .provisional
-        @unknown default: return .unknown
+        let permission: AlertPermission = switch settings.authorizationStatus {
+        case .notDetermined: .notDetermined
+        case .denied: .denied
+        case .authorized: .authorized
+        case .provisional: .provisional
+        @unknown default: .unknown
         }
+        let timeSensitive: AlertNotificationAccess.TimeSensitive = switch settings.timeSensitiveSetting {
+        case .enabled: .enabled
+        case .disabled: .disabled
+        case .notSupported: .notSupported
+        @unknown default: .unknown
+        }
+        return AlertNotificationAccess(permission: permission,
+                                       timeSensitive: hasTimeSensitiveEntitlement ? timeSensitive : .requiresSigning)
     }
 
-    func requestPermission() async throws -> AlertPermission {
+    func requestPermission() async throws -> AlertNotificationAccess {
         _ = try await center.requestAuthorization(options: [.alert, .sound])
-        return await permission()
+        return await access()
     }
 
-    func deliver(_ event: AlertEvent) async throws {
-        guard await permission().allowsNotifications else { throw AlertDeliveryError.permissionDenied }
+    func deliver(_ event: AlertEvent, timeSensitive: Bool) async throws {
+        guard await access().permission.allowsNotifications else { throw AlertDeliveryError.permissionDenied }
         let content = UNMutableNotificationContent()
+        content.interruptionLevel = timeSensitive && hasTimeSensitiveEntitlement ? .timeSensitive : .active
         content.title = event.rule.target.title
         content.subtitle = event.rule.trigger.title
         content.body = AlertPresentation.message(event)
@@ -41,14 +59,15 @@ final class MarketNotificationCenter: NSObject, UNUserNotificationCenterDelegate
         try await center.add(request)
     }
 
-    func sendTest() async throws {
-        guard await permission().allowsNotifications else { throw AlertDeliveryError.permissionDenied }
+    func sendTest(timeSensitive: Bool) async throws {
+        guard await access().permission.allowsNotifications else { throw AlertDeliveryError.permissionDenied }
         let content = UNMutableNotificationContent()
+        content.interruptionLevel = timeSensitive && hasTimeSensitiveEntitlement ? .timeSensitive : .active
         content.title = "MarketCopilot"
         content.subtitle = L10n.text("Test notification")
         content.body = L10n.text("Your market alerts will appear here. This is a test, not a market event.")
         content.sound = .default
-        try await center.add(UNNotificationRequest(identifier: "market-alert-test", content: content, trigger: nil))
+        try await center.add(UNNotificationRequest(identifier: "market-alert-test-\(UUID())", content: content, trigger: nil))
     }
 
     func cancel(eventID: UUID) {

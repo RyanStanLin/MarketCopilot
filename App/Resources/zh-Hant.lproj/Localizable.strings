@@ -271,3 +271,13 @@
 "Saved alerts" = "已儲存的通知";
 "Right-click a market or contract and choose Set notifications… to create an alert." = "以右鍵點按市場或合約，選擇「設定通知…」即可建立提醒。";
 "Alerts are saved per account and active position. Disconnected accounts and positions that are no longer active pause price and PnL monitoring." = "通知依帳戶及活躍持倉儲存。帳戶中斷連線或持倉不再活躍時，價格與盈虧提醒將暫停監控。";
+
+"Time Sensitive notifications" = "即時通知（Time Sensitive）";
+"Checking Time Sensitive access…" = "正在檢查即時通知權限…";
+"Time Sensitive: allowed by macOS" = "即時通知：macOS 已允許";
+"Time Sensitive: disabled in System Settings" = "即時通知：系統設定中已關閉";
+"Time Sensitive: unavailable on this system" = "即時通知：此系統不支援";
+"Allow Time Sensitive notifications for MarketCopilot in System Settings and in your active Focus. macOS still controls banners and sounds." = "請在系統設定及目前的專注模式中允許 MarketCopilot 的即時通知。橫幅與聲音仍由 macOS 控制。";
+"Notification priority saved." = "通知優先級已儲存。";
+"Time Sensitive: requires developer signing" = "即時通知：需要開發者簽署";
+"Time Sensitive requires a paid Apple Developer team and provisioning profile. This build uses standard notifications." = "即時通知需要付費 Apple Developer 團隊及描述檔。此版本使用一般通知。";

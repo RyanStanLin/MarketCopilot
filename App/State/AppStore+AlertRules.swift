@@ -43,7 +43,7 @@ extension AppStore {
     func refreshAlertPermission() async {
         guard !isDesignPreview else { return }
         let previous = alertPermission
-        alertPermission = await alertNotifications.permission()
+        alertNotificationAccess = await alertNotifications.access()
         if alertPermission.allowsNotifications && (previous == .denied || previous == .notDetermined) { resetAlertMonitoring() }
     }
 
@@ -51,10 +51,10 @@ extension AppStore {
         guard !isDesignPreview else { alertNotice = L10n.text("Design preview does not send notifications."); return false }
         isRequestingAlertPermission = true
         defer { isRequestingAlertPermission = false }
-        alertPermission = await alertNotifications.permission()
+        alertNotificationAccess = await alertNotifications.access()
         if alertPermission.allowsNotifications { return true }
         do {
-            alertPermission = try await alertNotifications.requestPermission()
+            alertNotificationAccess = try await alertNotifications.requestPermission()
             if alertPermission.allowsNotifications { resetAlertMonitoring() }
         }
         catch { alertNotice = error.localizedDescription; return false }
@@ -124,7 +124,8 @@ extension AppStore {
         Task {
             guard await requestAlertPermission() else { return }
             do {
-                try await alertNotifications.sendTest()
+                try await alertNotifications.sendTest(timeSensitive: refreshSettings.timeSensitiveNotifications)
+                await refreshAlertPermission()
                 alertNotice = L10n.text("Test notification submitted to macOS.")
             } catch { alertNotice = error.localizedDescription }
         }
@@ -132,6 +133,13 @@ extension AppStore {
 
     func openNotificationSystemSettings() {
         NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
+    }
+
+    func setTimeSensitiveNotifications(_ enabled: Bool) {
+        refreshSettings.timeSensitiveNotifications = enabled
+        refreshDraft.timeSensitiveNotifications = enabled
+        persistSnapshot()
+        alertNotice = L10n.text("Notification priority saved.")
     }
 
     func alertMonitoringStatus(_ rule: MarketAlertRule) -> String {

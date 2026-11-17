@@ -32,7 +32,8 @@ final class AppStore {
     var isConnecting = false
     var isSavingAccount = false
     var alertRules: [MarketAlertRule] = []
-    var alertPermission: AlertPermission = .unknown
+    var alertNotificationAccess = AlertNotificationAccess()
+    var alertPermission: AlertPermission { alertNotificationAccess.permission }
     var alertNotice = ""
     var isRequestingAlertPermission = false
     var warmingAlertIDs = Set<UUID>()

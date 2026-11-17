@@ -10,11 +10,12 @@ public struct RefreshSettings: Codable, Equatable, Sendable {
     public var predictionCashOffset: Decimal = 0
     public var perpsCashOffset: Decimal = 0
     public var liveColor = LiveColorSettings()
+    public var timeSensitiveNotifications = true
     public init() {}
 
     enum CodingKeys: String, CodingKey {
         case predictionMode, perpsMode, pollingInterval, reconciliationInterval, launchAtLogin, language
-        case predictionCashOffset, perpsCashOffset, cashOffset, liveColor
+        case predictionCashOffset, perpsCashOffset, cashOffset, liveColor, timeSensitiveNotifications
     }
 
     public init(from decoder: any Decoder) throws {
@@ -26,6 +27,7 @@ public struct RefreshSettings: Codable, Equatable, Sendable {
         launchAtLogin = try values.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? false
         language = try values.decodeIfPresent(AppLanguage.self, forKey: .language) ?? .system
         liveColor = try values.decodeIfPresent(LiveColorSettings.self, forKey: .liveColor) ?? LiveColorSettings()
+        timeSensitiveNotifications = try values.decodeIfPresent(Bool.self, forKey: .timeSensitiveNotifications) ?? true
         predictionCashOffset = try values.decodeIfPresent(Decimal.self, forKey: .predictionCashOffset) ?? 0
         // Older versions applied one combined offset. Preserve it once under Perps.
         perpsCashOffset = try values.decodeIfPresent(Decimal.self, forKey: .perpsCashOffset)
@@ -41,6 +43,7 @@ public struct RefreshSettings: Codable, Equatable, Sendable {
         try values.encode(launchAtLogin, forKey: .launchAtLogin)
         try values.encode(language, forKey: .language)
         try values.encode(liveColor, forKey: .liveColor)
+        try values.encode(timeSensitiveNotifications, forKey: .timeSensitiveNotifications)
         try values.encode(predictionCashOffset, forKey: .predictionCashOffset)
         try values.encode(perpsCashOffset, forKey: .perpsCashOffset)
     }
