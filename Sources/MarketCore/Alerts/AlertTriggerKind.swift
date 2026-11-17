@@ -3,7 +3,7 @@ public enum AlertTriggerKind: String, Codable, CaseIterable, Sendable, Identifia
     case returnAbove, returnBelow, nearLiquidation, fundingAbove, fundingBelow, positionEnded
     public var id: String { rawValue }
     public var title: String {
-        L10n.text(switch self {
+        let key = switch self {
         case .priceAbove: "Price crosses above"
         case .priceBelow: "Price crosses below"
         case .rapidRise: "Rapid price rise"
@@ -16,7 +16,8 @@ public enum AlertTriggerKind: String, Codable, CaseIterable, Sendable, Identifia
         case .fundingAbove: "Cumulative Funding crosses above"
         case .fundingBelow: "Cumulative Funding crosses below"
         case .positionEnded: "Position leaves active holdings"
-        })
+        }
+        return L10n.text(key)
     }
     public var metric: AlertMetric {
         switch self {

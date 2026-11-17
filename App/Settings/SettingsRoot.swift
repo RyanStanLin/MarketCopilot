@@ -9,6 +9,7 @@ struct SettingsRoot: View {
                 Tab("Account", systemImage: "person.crop.circle") { AccountSettings(store: store) }
                 Tab("Updates", systemImage: "arrow.triangle.2.circlepath") { UpdateSettings(store: store) }
                 Tab("Indicators", systemImage: "waveform.path") { IndicatorSettings(store: store) }
+                Tab("Notifications", systemImage: "bell.badge") { NotificationSettings(store: store) }
                 Tab("General", systemImage: "gearshape") { GeneralSettings(store: store) }
             }
             Divider()

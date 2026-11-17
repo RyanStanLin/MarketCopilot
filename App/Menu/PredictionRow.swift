@@ -58,7 +58,11 @@ struct PredictionRow: View {
         .help(title)
         .menuHover(.position, id: "prediction-\(position.id)")
         .accessibilityIdentifier("prediction-\(position.id)")
+        .contextMenu {
+            Button("Set notifications…", systemImage: "bell.badge", action: configureNotifications)
+        }
     }
 
     private func openPosition() { if let destination { openURL(destination) } }
+    private func configureNotifications() { store.openAlertSettings(store.alertTarget(for: position)) }
 }

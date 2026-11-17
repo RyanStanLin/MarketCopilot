@@ -53,7 +53,8 @@ extension PortfolioController {
 
     func refreshQuotes(token: UUID, force: Bool) async {
         let ids = requestedQuoteIDs
-        let interval = healthySockets.contains("perpsQuotes") ? settings.reconciliationInterval : settings.pollingInterval
+        let streamIsRecent = healthySockets.contains("perpsQuotes") && clock.now.timeIntervalSince(lastQuoteStream) <= 15
+        let interval = streamIsRecent ? settings.reconciliationInterval : settings.pollingInterval
         guard isCurrent(token), perpsValidated, !ids.isEmpty,
               mayRefresh(.perps, force: force, last: lastQuoteREST, interval: interval) else { return }
         do {

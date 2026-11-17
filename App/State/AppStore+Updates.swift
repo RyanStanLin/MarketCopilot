@@ -4,10 +4,15 @@ import MarketCore
 extension AppStore {
     func apply(_ update: PortfolioUpdate) {
         switch update {
-        case .predictions(let value): snapshot.predictions = value
+        case .predictions(let value):
+            snapshot.predictions = value
+            evaluateAlerts(for: .predictions)
         case .perps(let value):
             snapshot.perps = value
-        case .quotes(let values): quotes = values
+            evaluateAlerts(for: .perps)
+        case .quotes(let values):
+            quotes = values; liveAlertQuoteIDs.formUnion(values.keys)
+            evaluateAlerts(for: .perps)
         case .instruments(let values): instruments = values
         case .profile(let value):
             if let name = value.name, !name.isEmpty { accountName = name }

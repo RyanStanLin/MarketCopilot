@@ -24,6 +24,7 @@ public final class PortfolioController {
     var lastPerpsPush = Date.distantPast
     var lastMetadata = Date.distantPast
     var lastQuoteREST = Date.distantPast
+    var lastQuoteStream = Date.distantPast
     var lastProfile = Date.distantPast
     var health: [MarketProduct: DataHealth] = [:]
     var refreshTask: Task<Void, Never>?
@@ -71,7 +72,7 @@ public final class PortfolioController {
         for task in socketTasks.values { task.cancel() }
         socketTasks = [:]; socketSignatures = [:]; healthySockets = []; streamParsers = [:]
         quoteCache = [:]; authenticationBlocked = []; retryNotBefore = [:]
-        alertInstrumentIDs = []; lastQuoteREST = .distantPast
+        alertInstrumentIDs = []; lastQuoteREST = .distantPast; lastQuoteStream = .distantPast
         perpsValidated = false; account = nil
         lastPredictionREST = .distantPast; lastPerpsREST = .distantPast
         lastPerpsPush = .distantPast

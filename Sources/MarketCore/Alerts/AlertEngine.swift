@@ -6,6 +6,9 @@ public struct AlertEngine: Sendable {
     public init() {}
     public mutating func reset() { states = [:] }
     public mutating func reset(ruleID: UUID) { states[ruleID] = nil }
+    public func isWarmingUp(_ rule: MarketAlertRule) -> Bool {
+        rule.trigger.isRapidMove && states[rule.id]?.hasCompleteWindow != true
+    }
 
     public mutating func acknowledge(_ event: AlertEvent) {
         guard states[event.rule.id]?.pendingEvent == event.id else { return }
@@ -15,6 +18,11 @@ public struct AlertEngine: Sendable {
     public mutating func evaluate(_ rules: [MarketAlertRule], observation: AlertObservation,
                                  now: Date, maximumGap: TimeInterval) -> [AlertEvent] {
         rules.compactMap { rule in
+            if observation.targetID == rule.target.id,
+               observation.readings[.activePosition]?.value == 0, rule.trigger != .positionEnded {
+                reset(ruleID: rule.id)
+                return nil
+            }
             guard rule.isEnabled, rule.target.id == observation.targetID,
                   let reading = observation.readings[rule.trigger.metric] else { return nil }
             return evaluate(rule, reading: reading, now: now, maximumGap: maximumGap)

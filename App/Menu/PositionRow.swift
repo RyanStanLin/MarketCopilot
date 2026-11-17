@@ -64,9 +64,13 @@ struct PositionRow: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("position-\(position.id)")
         .menuHover(.position, id: "position-\(position.id)")
+        .contextMenu {
+            Button("Set notifications…", systemImage: "bell.badge", action: configureNotifications)
+        }
     }
 
     private func openPosition() {
         if let destination = store.perpsWebsiteURL { openURL(destination) }
     }
+    private func configureNotifications() { store.openAlertSettings(store.alertTarget(for: position)) }
 }

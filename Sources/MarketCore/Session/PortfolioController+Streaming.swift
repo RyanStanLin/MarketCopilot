@@ -87,7 +87,9 @@ extension PortfolioController {
                         acceptPerps(value)
                         onUpdate?(.status(.perps, L10n.format("WebSocket · Updated %@", value.timestamp.formatted(.dateTime.hour().minute().second().locale(L10n.locale)))))
                         configureSockets()
-                    case .quote(let id, let value): mergeQuotes([id: value]); scheduleQuoteFlush(token: token)
+                    case .quote(let id, let value):
+                        if key == "perpsQuotes" { lastQuoteStream = clock.now }
+                        mergeQuotes([id: value]); scheduleQuoteFlush(token: token)
                     case .accountChanged: requestEventRefresh(token: token)
                     }
                 }

@@ -31,9 +31,21 @@ final class AppStore {
     var settingsNotice = ""
     var isConnecting = false
     var isSavingAccount = false
+    var alertRules: [MarketAlertRule] = []
+    var alertPermission: AlertPermission = .unknown
+    var alertNotice = ""
+    var isRequestingAlertPermission = false
+    var warmingAlertIDs = Set<UUID>()
     let isDesignPreview: Bool
 
     @ObservationIgnored var openSettings: () -> Void = {}
+    @ObservationIgnored var openAlertSettings: (AlertTarget) -> Void = { _ in }
+    @ObservationIgnored var alertRulesChanged: () -> Void = {}
+    @ObservationIgnored let alertNotifications = MarketNotificationCenter()
+    @ObservationIgnored var alertEngine = AlertEngine()
+    @ObservationIgnored var liveAlertQuoteIDs = Set<Int>()
+    @ObservationIgnored var alertDeliveryTasks: [UUID: Task<Void, Never>] = [:]
+    @ObservationIgnored var pendingAlertEvents: [UUID: UUID] = [:]
     @ObservationIgnored var renderedMenuHeightChanged: (CGFloat) -> Void = { _ in }
     @ObservationIgnored var refreshRequested: () -> Void = {}
     @ObservationIgnored var drawerChanged: () -> Void = {}

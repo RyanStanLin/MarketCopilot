@@ -21,6 +21,11 @@ final class AppCoordinator {
             controller?.onUpdate = { [weak store] update in store?.apply(update) }
             store.refreshRequested = { [weak self] in Task { await self?.controller?.refresh() } }
             store.settingsApplied = { [weak self] in self?.restart() }
+            store.alertRulesChanged = { [weak self] in
+                guard let self, !self.isSleeping else { return }
+                self.controller?.setAlertInstrumentIDs(self.store.monitoredAlertInstrumentIDs)
+                Task { await self.controller?.refresh() }
+            }
             store.drawerChanged = { [weak self] in
                 guard let self else { return }
                 self.controller?.setDrawerExpanded(self.store.isPerpsExpanded)
@@ -38,12 +43,15 @@ final class AppCoordinator {
 
     func restart() {
         guard !isSleeping else { return }
+        store.resetAlertMonitoring()
         controller?.start(account: store.account, secrets: store.activeSecrets,
                           settings: store.refreshSettings, cached: store.snapshot)
         controller?.setDrawerExpanded(store.isPerpsExpanded)
+        controller?.setAlertInstrumentIDs(store.monitoredAlertInstrumentIDs)
     }
 
     func stop() {
+        store.resetAlertMonitoring()
         controller?.stop(); cacheTask?.cancel()
         monitor.cancel()
         for observer in observers { NSWorkspace.shared.notificationCenter.removeObserver(observer) }
@@ -56,6 +64,7 @@ final class AppCoordinator {
         observers.append(center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in
                 self?.isSleeping = true
+                self?.store.resetAlertMonitoring()
                 self?.controller?.stop(); self?.store.persistSnapshot()
             }
         })
@@ -66,6 +75,7 @@ final class AppCoordinator {
             Task { @MainActor in
                 if path.status == .satisfied { self?.restart() }
                 else {
+                    self?.store.resetAlertMonitoring()
                     self?.controller?.stop()
                     self?.store.predictionStatus = L10n.text("Offline — showing the last valid snapshot.")
                     self?.store.perpsStatus = L10n.text("Offline — showing the last valid snapshot.")

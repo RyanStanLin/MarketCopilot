@@ -12,6 +12,8 @@ extension AppStore {
             refreshSettings = settings; refreshDraft = settings
             L10n.language = settings.language
             self.instruments = instruments
+            do { alertRules = try repository.loadAlerts(); updateAlertWarmup() }
+            catch { alertNotice = L10n.format("Alerts could not be loaded: %@", error.localizedDescription) }
             if account.isConfigured {
                 secretsDraft = try KeychainVault().load(identity: account.identity)
                 activeSecrets = secretsDraft

@@ -12,6 +12,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var clickMonitor: Any?
     private var localMonitor: Any?
     private var settingsWindow: NSWindow?
+    private var alertWindow: NSWindow?
+    private var isTrackingContextMenu = false
     private var coordinator: AppCoordinator?
     private var menuTopLeft: CGPoint?
 
@@ -23,8 +25,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.setAccessibilityLabel(MarketCore.name)
         statusItem = item
         store.openSettings = { [weak self] in self?.showSettings() }
+        store.openAlertSettings = { [weak self] target in self?.showAlertSettings(target: target) }
         store.displayPreferencesChanged = { [weak self] in
             self?.settingsWindow?.title = L10n.text("MarketCopilot Settings")
+            self?.alertWindow?.title = L10n.text("Position alerts")
             self?.updateStatus()
         }
         store.renderedMenuHeightChanged = { [weak self] height in self?.resizeMenu(height: height) }
@@ -112,6 +116,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !store.isMenuOpen { toggleMenu() }
     }
 
+    private func showAlertSettings(target: AlertTarget) {
+        closeMenu()
+        let window = alertWindow ?? NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 720),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        if alertWindow == nil { window.isReleasedWhenClosed = false; window.center() }
+        window.title = L10n.text("Position alerts")
+        window.contentView = NSHostingView(rootView: AlertRulesWindow(store: store, target: target))
+        alertWindow = window
+        NSApp.activate(); window.makeKeyAndOrderFront(nil)
+    }
+
     private func closeMenu() {
         guard store.isMenuOpen else { return }
         withAnimation(NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : .easeInOut(duration: 0.16)) { store.isMenuOpen = false } completion: { [weak self] in
@@ -162,12 +177,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func installMonitors() {
+        NotificationCenter.default.addObserver(self, selector: #selector(contextMenuBegan), name: NSMenu.didBeginTrackingNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(contextMenuEnded), name: NSMenu.didEndTrackingNotification, object: nil)
         clickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             let point = NSEvent.mouseLocation
             Task { @MainActor in self?.dismissIfOutside(point) }
         }
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self] event in
             guard let self else { return event }
+            if self.isTrackingContextMenu { return event }
             if event.type == .keyDown && event.keyCode == 53 && self.store.isMenuOpen { self.closeMenu(); return nil }
             if event.type == .keyDown && self.store.isMenuOpen && [125, 126].contains(event.keyCode) {
                 self.store.navigateDrawer(event.keyCode == 125 ? 1 : -1)
@@ -181,8 +199,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func dismissIfOutside(_ point: CGPoint) {
+        guard !isTrackingContextMenu else { return }
         guard store.isMenuOpen, let panel, let button = statusItem?.button, let window = button.window else { return }
         let statusFrame = window.convertToScreen(button.convert(button.bounds, to: nil))
         if MenuInteraction.shouldDismiss(point: point, menuFrame: panel.frame, statusFrame: statusFrame) { closeMenu() }
     }
+
+    @objc private func contextMenuBegan(_ notification: Notification) { if store.isMenuOpen { isTrackingContextMenu = true } }
+    @objc private func contextMenuEnded(_ notification: Notification) { isTrackingContextMenu = false }
 }
