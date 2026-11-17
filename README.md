@@ -129,6 +129,20 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 
 第一次保存启用的规则时请求系统通知权限；拒绝后会保存为暂停状态，可在设置中允许通知后重新开启。通知页提供权限状态和“发送测试通知”。提醒只在应用运行时评估；收起菜单后仍继续监控，睡眠、退出或断网期间不补发未知行情。Perps 有需要价格的启用规则时会保留对应持仓的后台行情订阅；仅轮询模式继续遵循 Updates 的间隔，WebSocket 失联或静默时回退轮询。价格、清算距离与盈亏分别检查其依赖的数据时间，缓存与过期数据不会触发提醒。
 
+**Settings → Notifications → Time Sensitive notifications / 即时通知** 默认开启并立即保存；关闭后使用普通通知。真实提醒和测试通知使用同一优先级。应用读取 macOS 的实际即时通知权限，并在该开关下方显示允许、关闭或不可用状态；开关开启本身不代表系统已经授权。
+
+**当前公开 DMG 和默认本地构建使用临时签名，仍发送普通通知。** 应用会检查自身实际签名中的 entitlement；缺少该能力时显示“需要开发者签名”，自动使用普通优先级，保留即时通知偏好。启用该能力需要付费 Apple Developer 团队、有效证书和包含 `com.apple.developer.usernotifications.time-sensitive` 的配置文件；免费 Personal Team 不支持。仓库提供独立的 [`MarketCopilot-TimeSensitive.entitlements`](App/MarketCopilot-TimeSensitive.entitlements)，默认构建不依赖该权限，因此普通用户和 CI 仍能直接 Build。
+
+具备上述团队、证书且已在 Xcode 登录开发者账户时，可以使用自动配置文件签名：
+
+```sh
+MARKETCOPILOT_DEVELOPMENT_TEAM=YOUR_TEAM_ID zsh Scripts/build.sh Release
+```
+
+此可选方式使用 Apple Development 证书和即时通知 entitlement。用 Xcode 界面构建时，选择相应付费团队、启用自动签名与 Time Sensitive Notifications capability，并将 `CODE_SIGN_ENTITLEMENTS` 设为 `App/MarketCopilot-TimeSensitive.entitlements`。开发证书与私钥留在本机 Keychain；不提交到仓库。公开 GitHub Actions 当前继续生成普通通知版 DMG。
+
+要在专注模式期间收到提醒，请在 **系统设置 → 通知 → MarketCopilot** 允许通知及即时通知，并在当前 **专注模式 → 选项** 中允许即时通知；横幅样式和声音仍遵循系统设置。系统关闭即时通知时，提醒仍按系统规则处理，应用不会强行绕过。Apple 的 [Time Sensitive 说明](https://developer.apple.com/documentation/usernotifications/unnotificationinterruptionlevel/timesensitive)明确由用户决定是否允许此类打断。**Critical Alerts / 重要警报** 是另一种级别，需要 [Apple 单独批准的 entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.usernotifications.critical-alerts)，本应用不申请或声称具备该权限。
+
 规则通过 SwiftData 保存，并绑定 Predictions 钱包或 Perps 账户地址；未填写 Perps owner 时，使用已验证会话的公开 proxy 地址作为隔离标识。更换账户后旧规则暂停，账户断开或持仓不再活跃时，价格及盈亏规则暂停监控。历史规则仍可从通知设置管理，持仓再次活跃时重新建立基线。通知点击后打开对应的官方 Polymarket 页面。
 
 ## 金额口径
