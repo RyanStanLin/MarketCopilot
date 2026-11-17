@@ -1,8 +1,15 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="Docs/Assets/AppIcon-dark.png">
+  <img src="Docs/Assets/AppIcon-light.png" width="128" height="128" alt="MarketCopilot app icon">
+</picture>
+
 # MarketCopilot
 
 原生 macOS 27 菜单栏应用，分别查看 Polymarket Predictions 与 Perps 的资产、现金和永续持仓。
 
 采用 SwiftUI、AppKit、SwiftData 和官方 Polymarket REST / WebSocket，无第三方依赖。API 凭证仅保存到 macOS Keychain，不需要钱包私钥。
+
+应用图标保留原生 Icon Composer 的分层、材质及深浅外观，源码位于 [`AppIcon.icon`](App/Resources/AppIcon.icon)。README 使用同一图标的系统渲染，随 GitHub 深浅主题切换；修改图标后运行 `zsh Scripts/export-icons.sh` 同步两份预览。
 
 ## Build
 
