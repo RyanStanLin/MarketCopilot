@@ -21,6 +21,7 @@ extension AppStore {
             if product == .predictions { predictionStatus = text } else { perpsStatus = text }
         case .health(let product, let value):
             if product == .predictions { predictionHealth = value } else { perpsHealth = value }
+            evaluateAlerts(for: product)
         case .busy(let busy):
             isRefreshing = busy; isConnecting = busy
             if !busy && account.isConfigured {

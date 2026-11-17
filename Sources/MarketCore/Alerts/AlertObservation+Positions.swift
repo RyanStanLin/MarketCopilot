@@ -23,7 +23,7 @@ extension AlertObservation {
             .funding: AlertReading(position.cumulativeFunding, at: snapshot.timestamp)
         ]
         if let quote = quotes[id], let mark = quote.mark, mark > 0 {
-            values[.price] = AlertReading(mark, at: quote.timestamp)
+            values[.price] = AlertReading(mark, at: quote.timestamp, dependingOn: snapshot.timestamp)
             if let liquidation = position.liquidationPrice, liquidation > 0 {
                 let distance = position.isLong ? mark - liquidation : liquidation - mark
                 values[.liquidationBuffer] = AlertReading(max(0, distance / mark * 100),

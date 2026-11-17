@@ -18,6 +18,8 @@ extension AppStore {
 
     func evaluateAlerts(for product: MarketProduct) {
         guard !isDesignPreview else { return }
+        let health = product == .predictions ? predictionHealth : perpsHealth
+        guard health.channel != .cache, health.issue == nil else { return }
         let rules = alertRules.filter { $0.isEnabled && $0.target.product == product && isAlertAccountActive($0.target) }
         var seen = Set<String>()
         let freshQuotes = quotes.filter { liveAlertQuoteIDs.contains($0.key) }
