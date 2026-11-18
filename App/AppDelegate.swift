@@ -126,7 +126,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if menuBarSettingsWindow == nil {
             let window = MenuBarToolPanel()
             window.title = L10n.text("Customize Menu Bar")
-            let host = NSHostingView(rootView: MenuBarTokenEditor(store: store).padding(MenuBarEditorTokens.overflow))
+            let host = NSHostingView(rootView: MenuBarTokenEditor(store: store))
             host.sizingOptions = []
             window.contentView = host
             window.onCancel = { [weak self] in self?.closeMenuBarSettings() }
@@ -142,12 +142,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
               let button = statusItem?.button, let window = button.window else { return }
         let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
         let screen = (window.screen ?? NSScreen.main)?.visibleFrame ?? .zero
-        let width = min(MenuBarEditorTokens.preferredWidth(store.refreshSettings.menuBarTokens), max(81, screen.width - 16))
+        let width = min(max(220, MenuBarEditorTokens.preferredWidth(store.refreshSettings.menuBarTokens)), screen.width - 16)
         let height = MenuBarEditorTokens.height + MenuBarEditorTokens.scrollerHeight
         let x = min(max(screen.minX + 8, anchor.midX - width / 2), screen.maxX - width - 8)
-        let overflow = MenuBarEditorTokens.overflow
-        tool.setFrame(NSRect(x: x - overflow, y: anchor.minY - 4 - height - overflow,
-                             width: width + overflow * 2, height: height + overflow * 2), display: true)
+        tool.setContentSize(NSSize(width: width, height: height))
+        var frame = tool.frame
+        frame.origin = NSPoint(x: x, y: anchor.minY - 4 - frame.height)
+        tool.setFrame(frame, display: true)
     }
 
     private func closeMenuBarSettings() {
@@ -247,7 +248,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func dismissMenuBarSettingsIfOutside(_ point: CGPoint) {
         guard store.isMenuBarEditorOpen, let tool = menuBarSettingsWindow,
-              !tool.frame.insetBy(dx: MenuBarEditorTokens.overflow, dy: MenuBarEditorTokens.overflow).contains(point) else { return }
+              !tool.frame.contains(point) else { return }
         closeMenuBarSettings()
     }
 

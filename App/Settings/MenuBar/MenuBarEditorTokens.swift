@@ -7,7 +7,8 @@ enum MenuBarEditorTokens {
     static let width: CGFloat = 717
     static let height: CGFloat = 50
     static let scrollerHeight: CGFloat = 8
-    static let overflow: CGFloat = 12
+    static let edgeWidth: CGFloat = 24
+    static let edgeBlurRadius: CGFloat = 6
     static let addWidth: CGFloat = 57
     static let inset: CGFloat = 8
     static let gap: CGFloat = 4
@@ -35,6 +36,6 @@ enum MenuBarEditorTokens {
 
     static func preferredWidth(_ tokens: [MenuBarToken]) -> CGFloat {
         let content = tokens.reduce(0) { $0 + tokenWidth($1) } + CGFloat(max(0, tokens.count - 1)) * gap
-        return min(width, content + inset * 2 + 8 + addWidth)
+        return min(width, content + inset * 4 + addWidth)
     }
 }
