@@ -77,10 +77,13 @@ extension AppStore {
         case .profit, .profitDirection: number = profit; kind = .profit
         case .returnPercentage: number = target.product == .perps ? perp?.returnOnEquity : prediction?.returnOnEquity; kind = .returnOnEquity
         case .quantity: number = target.product == .perps ? perp.map { abs($0.size) } : prediction?.shares; kind = .shares
-        case .priceChange, .priceChangePercentage:
+        case .priceChange, .priceChangePercentage, .priceDirection:
             number = price.flatMap { current in entry.flatMap { original in
-                guard original > 0 else { return nil }
-                return metric == .priceChange ? current - original : (current - original) / original
+                if metric == .priceChangePercentage {
+                    guard original > 0 else { return nil }
+                    return (current - original) / original
+                }
+                return current - original
             } }; kind = .now
         case .bid: number = quote?.bid; kind = .now
         case .ask: number = quote?.ask; kind = .now
@@ -98,6 +101,7 @@ extension AppStore {
         switch metric {
         case .returnPercentage, .priceChangePercentage: text = MarketFormat.percent(number)
         case .profitDirection: text = L10n.text(number > 0 ? "Profit" : number < 0 ? "Loss" : "Flat")
+        case .priceDirection: text = L10n.text(number > 0 ? "Up" : number < 0 ? "Down" : "Flat")
         case .quantity: text = NSDecimalNumber(decimal: number).stringValue
         case .leverage: text = L10n.format("%lldx", perp?.leverage ?? 0)
         case .price, .entry, .priceChange, .bid, .ask:

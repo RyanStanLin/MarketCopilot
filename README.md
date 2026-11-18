@@ -91,6 +91,11 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 ## 使用与更新
 
 - 菜单栏持续显示两类资产的合计 Portfolio 与合计 Cash。
+- General / 通用 → **Menu Bar / 菜单栏 → Customize Menu Bar… / 自定义菜单栏…** 打开按 Figma `19:519` 实现的横向 token 编辑栏。通过 **Add / 添加** 增加 token，左侧手柄左右拖动排序，右侧 `×` 删除；选择框支持输入并自动补全已有选项。修改立即更新菜单栏并经 SwiftData 保存，无需 Save & Connect。token 较多时可横向滚动编辑栏，Add 按钮保持可见。
+- 全局 token 可分别选择合计、Predictions 或 Perps 的 Portfolio / Cash，区分原始官方金额与 **with Offset / 含偏移** 金额。默认保持原来的合计 Portfolio 与 Cash（都包含 offset）。含偏移金额沿用菜单相同口径，不会重复加现金或 offset；单一来源可用时依然显示已知合计。
+- 持仓 token 支持 Position、Price、Entry、Profit、Return percentage、Profit / Loss、Side、Quantity，以及价格变化金额 / 百分比 / 涨跌文字；Perps 另有 Bid、Ask、清算价、Margin、Funding 和杠杆。收益率、盈亏和仓位明细来自当前活跃持仓；价格变化与 Price direction 的 Up / Down / Flat 相对该持仓的入场价 / 平均价，非 24 小时行情涨跌。Profit / Loss 文本依据本人未实现盈亏的正负，Side 显示 Long / Short 或 Yes / No。
+- Price / Bid / Ask 还可选择官方列表中未持有的 Perps 合约；对应行情在菜单收起后保持 WebSocket 订阅，并遵循 Updates 中的轮询回退设置。其他持仓指标只提供当前持仓供新选择。选项绑定产品、账户和市场 ID，不会因位置顺序变化改成别的市场；平仓、切换账户或所需数据缺失时保留配置并显示 `—`。
+- **App Icon / 应用图标** 本身也是 token，可与数据混排，也可以只保留这一个 token。使用提供的原始 SVG 作为原生 template 图标，保持比例和全部路径，随菜单栏深浅外观自动着色。删除全部 token 时同样显示该图标，仍可访问菜单。通用设置可恢复默认组合。数值保留 `.contentTransition(.numericText())` 及既有 Live color indicator，悬停说明包含完整指标与来源状态。
 - 打开菜单或展开任一抽屉会立即请求最新数据。Predictions 的 Markets 只展示当前仍有份额的活跃持仓，排除已退出、已结算待赎回和归档市场；展示市场问题、Yes / No 和平均单价 token、当前份数、价值、收益与百分比、平均价及当前价。Perps 展示 Long / Short 与杠杆 token、收益及六项明细。官方组合估值仍独立读取，不因抽屉筛选而被重算。
 - 两种抽屉按手风琴方式切换，打开 Predictions 会把 Perps 汇总行向下推，菜单顶边保持固定。超过两类持仓时，抽屉最多 450 pt，可使用滚轮、触控板或上下方向键逐项滚动。屏幕空间不足时也会缩小视口并允许滚动。
 - 卡片之间保留设计中的分隔线。滚动到顶部仅保留下方 65 pt 透明渐进模糊，到底部仅保留上方，中间两侧都有；没有灰色阴影遮罩。模糊半径和透明度逐像素变化，逐渐露出原生 quaternary 背景。视口边缘使用每条扫描线不同的 Metal 变换，从 1× 平滑过渡到 0.95×；下方内容锚定顶部、上方内容锚定底部，不对整张卡片统一缩放。边缘效果同时随离开端点的滚动距离连续增强，24 pt 内缓入，并以 0.16 秒动画平滑衔接，到达端点时缓出。减少动态效果开启时取消透视，保留模糊。
@@ -177,5 +182,6 @@ Debug 的 `--design-preview` 显式启用 Figma 样例；`--expanded` 展开抽�
 - [Updated Perps drawer](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=2-4069)
 - [Prediction drawer](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=10-138)
 - [Head icons](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=1-3545)
+- [Menu Bar token editor](https://www.figma.com/design/6NDdW5dL54pCEkG3juc8TR/Untitled?node-id=19-519)
 
 实现按原生骨架、设计素材、菜单、设置、Prediction、Perps、实时协调、原生接线和验收分别提交。

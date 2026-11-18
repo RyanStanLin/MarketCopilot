@@ -4,7 +4,7 @@ public enum MenuBarMetric: String, CaseIterable, Codable, Sendable, Identifiable
     case predictionPortfolioWithOffset, predictionCashWithOffset, predictionPortfolio, predictionCash
     case perpsPortfolioWithOffset, perpsCashWithOffset, perpsPortfolio, perpsCash
     case position, price, entry, profit, returnPercentage, profitDirection, side, quantity
-    case priceChange, priceChangePercentage, bid, ask, liquidation, margin, funding, leverage
+    case priceChange, priceChangePercentage, priceDirection, bid, ask, liquidation, margin, funding, leverage
 
     public var id: String { rawValue }
 
@@ -34,6 +34,7 @@ public enum MenuBarMetric: String, CaseIterable, Codable, Sendable, Identifiable
         case .quantity: "Quantity"
         case .priceChange: "Price change"
         case .priceChangePercentage: "Price change %"
+        case .priceDirection: "Price direction"
         case .bid: "Bid"
         case .ask: "Ask"
         case .liquidation: "Liq. price"
@@ -46,13 +47,13 @@ public enum MenuBarMetric: String, CaseIterable, Codable, Sendable, Identifiable
     public var needsTarget: Bool {
         switch self {
         case .position, .price, .entry, .profit, .returnPercentage, .profitDirection, .side, .quantity,
-             .priceChange, .priceChangePercentage, .bid, .ask, .liquidation, .margin, .funding, .leverage: true
+             .priceChange, .priceChangePercentage, .priceDirection, .bid, .ask, .liquidation, .margin, .funding, .leverage: true
         default: false
         }
     }
 
     public var needsQuote: Bool {
-        [.price, .bid, .ask, .priceChange, .priceChangePercentage].contains(self)
+        [.price, .bid, .ask, .priceChange, .priceChangePercentage, .priceDirection].contains(self)
     }
 
     public func supports(_ product: MarketProduct) -> Bool {
