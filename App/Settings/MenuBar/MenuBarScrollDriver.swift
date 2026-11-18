@@ -3,9 +3,22 @@ import AppKit
 @MainActor
 final class MenuBarScrollDriver {
     weak var scrollView: NSScrollView?
+    var onScrollChange: () -> Void = {}
+    private var boundsObserver: NSObjectProtocol?
 
     func attach(_ view: NSScrollView) {
+        if scrollView !== view {
+            detach()
+            view.contentView.postsBoundsChangedNotifications = true
+            boundsObserver = NotificationCenter.default.addObserver(forName: NSView.boundsDidChangeNotification,
+                object: view.contentView, queue: .main) { [weak self] _ in
+                    Task { @MainActor in self?.onScrollChange() }
+                }
+        }
         scrollView = view
+        view.contentView.wantsLayer = true
+        view.contentView.clipsToBounds = true
+        view.contentView.layer?.masksToBounds = true
         if !view.hasHorizontalScroller { view.hasHorizontalScroller = true }
         if view.hasVerticalScroller { view.hasVerticalScroller = false }
         if view.autohidesScrollers { view.autohidesScrollers = false }
@@ -14,11 +27,26 @@ final class MenuBarScrollDriver {
         if view.horizontalScrollElasticity != .automatic { view.horizontalScrollElasticity = .automatic }
         if !view.usesPredominantAxisScrolling { view.usesPredominantAxisScrolling = true }
         let insets = NSEdgeInsets(top: 0, left: MenuBarEditorTokens.inset, bottom: 1,
-                                 right: MenuBarEditorTokens.addWidth + MenuBarEditorTokens.inset * 2)
+                                 right: MenuBarEditorTokens.inset)
         let current = view.scrollerInsets
         if current.top != insets.top || current.left != insets.left || current.bottom != insets.bottom || current.right != insets.right {
             view.scrollerInsets = insets
         }
+        onScrollChange()
+    }
+
+    var edgeDistances: (leading: CGFloat, trailing: CGFloat) {
+        guard let view = scrollView, let document = view.documentView else { return (0, 0) }
+        let minimum = -view.contentInsets.left
+        let maximum = max(minimum, document.frame.width - view.contentView.bounds.width + view.contentInsets.right)
+        guard maximum - minimum > 0.5 else { return (0, 0) }
+        return (abs(view.contentView.bounds.minX - minimum), abs(maximum - view.contentView.bounds.minX))
+    }
+
+    func detach() {
+        if let boundsObserver { NotificationCenter.default.removeObserver(boundsObserver) }
+        boundsObserver = nil
+        scrollView = nil
     }
 
     @discardableResult

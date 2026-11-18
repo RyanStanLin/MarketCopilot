@@ -36,8 +36,8 @@ final class MenuBarPreviewToolbar: NSObject, NSToolbarDelegate {
                  willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         let item = NSToolbarItem(itemIdentifier: identifier)
         if identifier == Self.closeID {
-            let button = NSButton(image: NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: L10n.text("Close"))!,
-                                  target: self, action: #selector(close))
+            let button = NSButton(title: "", target: self, action: #selector(close))
+            button.image = NSImage(systemSymbolName: "xmark.circle.fill", accessibilityDescription: L10n.text("Close"))
             button.isBordered = false
             button.contentTintColor = .secondaryLabelColor
             button.symbolConfiguration = .init(pointSize: 12, weight: .semibold)

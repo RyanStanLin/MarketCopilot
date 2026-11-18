@@ -8,10 +8,10 @@ final class MenuBarToolPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 
     init() {
-        super.init(contentRect: .zero, styleMask: [.titled, .closable, .nonactivatingPanel],
+        super.init(contentRect: .zero, styleMask: [.titled, .closable, .fullSizeContentView, .nonactivatingPanel],
                    backing: .buffered, defer: false)
         isOpaque = false
-        backgroundColor = .windowBackgroundColor
+        backgroundColor = .clear
         hasShadow = true
         isFloatingPanel = true
         level = .floating
@@ -29,6 +29,28 @@ final class MenuBarToolPanel: NSPanel {
         for kind: NSWindow.ButtonType in [.closeButton, .miniaturizeButton, .zoomButton] {
             standardWindowButton(kind)?.isHidden = true
         }
+    }
+
+    func installEditor(_ editor: NSView) {
+        let backdrop = NSVisualEffectView()
+        backdrop.material = .popover
+        backdrop.blendingMode = .behindWindow
+        backdrop.state = .active
+        contentView = backdrop
+        editor.translatesAutoresizingMaskIntoConstraints = false
+        backdrop.addSubview(editor)
+        let top = (contentLayoutGuide as? NSLayoutGuide)?.topAnchor ?? backdrop.safeAreaLayoutGuide.topAnchor
+        NSLayoutConstraint.activate([
+            editor.leadingAnchor.constraint(equalTo: backdrop.leadingAnchor),
+            editor.trailingAnchor.constraint(equalTo: backdrop.trailingAnchor),
+            editor.topAnchor.constraint(equalTo: top),
+            editor.bottomAnchor.constraint(equalTo: backdrop.bottomAnchor)
+        ])
+    }
+
+    func frameSize(forEditorSize size: NSSize) -> NSSize {
+        let chrome = max(0, frame.height - contentLayoutRect.height)
+        return NSSize(width: size.width, height: size.height + chrome)
     }
 
     override func cancelOperation(_ sender: Any?) { onCancel() }

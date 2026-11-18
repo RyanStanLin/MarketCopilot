@@ -46,7 +46,7 @@ final class MenuBarReorderState {
     func edgeVelocity(viewportWidth: CGFloat) -> CGFloat {
         guard isLifted else { return 0 }
         let left = MenuBarEditorTokens.inset
-        let right = viewportWidth - MenuBarEditorTokens.addWidth - MenuBarEditorTokens.inset * 2
+        let right = viewportWidth - MenuBarEditorTokens.inset
         let band: CGFloat = 28
         if pointer.x < left + band { return -360 * min(1, max(0, (left + band - pointer.x) / band)) }
         if pointer.x > right - band { return 360 * min(1, max(0, (pointer.x - right + band) / band)) }
