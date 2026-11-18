@@ -12,9 +12,13 @@ final class MenuBarScrollDriver {
         if view.scrollerStyle != .overlay { view.scrollerStyle = .overlay }
         if view.verticalScrollElasticity != .none { view.verticalScrollElasticity = .none }
         if view.horizontalScrollElasticity != .automatic { view.horizontalScrollElasticity = .automatic }
-        view.usesPredominantAxisScrolling = true
-        view.scrollerInsets = NSEdgeInsets(top: 0, left: MenuBarEditorTokens.inset, bottom: 1,
-                                         right: MenuBarEditorTokens.addWidth + MenuBarEditorTokens.inset * 2)
+        if !view.usesPredominantAxisScrolling { view.usesPredominantAxisScrolling = true }
+        let insets = NSEdgeInsets(top: 0, left: MenuBarEditorTokens.inset, bottom: 1,
+                                 right: MenuBarEditorTokens.addWidth + MenuBarEditorTokens.inset * 2)
+        let current = view.scrollerInsets
+        if current.top != insets.top || current.left != insets.left || current.bottom != insets.bottom || current.right != insets.right {
+            view.scrollerInsets = insets
+        }
     }
 
     @discardableResult

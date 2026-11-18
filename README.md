@@ -92,6 +92,8 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 
 - 菜单栏持续显示两类资产的合计 Portfolio 与合计 Cash。
 - General / 通用 → **Menu Bar / 菜单栏 → Customize Menu Bar… / 自定义菜单栏…** 打开按 Figma `19:519` 实现的横向 token 编辑栏。通过 **Add / 添加** 增加 token，左侧手柄左右拖动排序，右侧 `×` 删除；选择框支持输入并自动补全已有选项。修改立即更新菜单栏并经 SwiftData 保存，无需 Save & Connect。token 较多时可横向滚动编辑栏，Add 按钮保持可见。
+- 编辑器使用无标题栏的迷你浮动工具面板，宽度随 token 数量收紧，最多保留设计中的 717 pt，出现在当前菜单栏项正下方并避开屏幕边缘；按 Escape 或点击面板外收起。保留原来的 34 pt token 和间距，另为水平滚动条留出 8 pt。滚动容器允许阴影和动画越过原有裁剪边界，并使用系统 `.scrollEdgeEffectStyle(.soft, for: .horizontal)`，让内容在固定边缘与 Add 控件下方柔和模糊过渡。
+- 面板显示期间，token 持续以略有错开的节奏轻晃。拖动手柄会移动同一颗真实 token，保留原来的原生选择框和删除按钮，不创建文字替身；抬起时放大至 1.035×、透明度降至 82%，阴影加深，其他 token 用弹簧动画让位。拖至左右边缘会自动滚动；拖动中仅预览顺序，松手时保存一次，再以弹簧动画落下。系统“减少动态效果”开启时停用轻晃和放大，保留拖动排序。
 - 全局 token 可分别选择合计、Predictions 或 Perps 的 Portfolio / Cash，区分原始官方金额与 **with Offset / 含偏移** 金额。默认保持原来的合计 Portfolio 与 Cash（都包含 offset）。含偏移金额沿用菜单相同口径，不会重复加现金或 offset；单一来源可用时依然显示已知合计。
 - 持仓 token 支持 Position、Price、Entry、Profit、Return percentage、Profit / Loss、Side、Quantity，以及价格变化金额 / 百分比 / 涨跌文字；Perps 另有 Bid、Ask、清算价、Margin、Funding 和杠杆。收益率、盈亏和仓位明细来自当前活跃持仓；价格变化与 Price direction 的 Up / Down / Flat 相对该持仓的入场价 / 平均价，非 24 小时行情涨跌。Profit / Loss 文本依据本人未实现盈亏的正负，Side 显示 Long / Short 或 Yes / No。
 - Price / Bid / Ask 还可选择官方列表中未持有的 Perps 合约；对应行情在菜单收起后保持 WebSocket 订阅，并遵循 Updates 中的轮询回退设置。其他持仓指标只提供当前持仓供新选择。选项绑定产品、账户和市场 ID，不会因位置顺序变化改成别的市场；平仓、切换账户或所需数据缺失时保留配置并显示 `—`。
