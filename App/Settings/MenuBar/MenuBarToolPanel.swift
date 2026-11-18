@@ -2,8 +2,8 @@ import AppKit
 
 final class MenuBarToolPanel: NSPanel {
     var onCancel: () -> Void = {}
-    private let previewToolbar = MenuBarPreviewToolbar()
-    override var title: String { didSet { previewToolbar.titleField.stringValue = title } }
+    private let previewHeader = MenuBarPreviewHeader(frame: .zero)
+    override var title: String { didSet { previewHeader.updateTitle(title) } }
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
@@ -23,9 +23,7 @@ final class MenuBarToolPanel: NSPanel {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         titlebarSeparatorStyle = .none
-        toolbarStyle = .unifiedCompact
-        toolbar = previewToolbar.makeToolbar()
-        previewToolbar.onClose = { [weak self] in self?.onCancel() }
+        previewHeader.onClose = { [weak self] in self?.onCancel() }
         for kind: NSWindow.ButtonType in [.closeButton, .miniaturizeButton, .zoomButton] {
             standardWindowButton(kind)?.isHidden = true
         }
@@ -37,20 +35,24 @@ final class MenuBarToolPanel: NSPanel {
         backdrop.blendingMode = .behindWindow
         backdrop.state = .active
         contentView = backdrop
+        previewHeader.translatesAutoresizingMaskIntoConstraints = false
         editor.translatesAutoresizingMaskIntoConstraints = false
+        backdrop.addSubview(previewHeader)
         backdrop.addSubview(editor)
-        let top = (contentLayoutGuide as? NSLayoutGuide)?.topAnchor ?? backdrop.safeAreaLayoutGuide.topAnchor
         NSLayoutConstraint.activate([
+            previewHeader.topAnchor.constraint(equalTo: backdrop.topAnchor),
+            previewHeader.leadingAnchor.constraint(equalTo: backdrop.leadingAnchor),
+            previewHeader.trailingAnchor.constraint(equalTo: backdrop.trailingAnchor),
+            previewHeader.heightAnchor.constraint(equalToConstant: MenuBarEditorTokens.previewHeaderHeight),
             editor.leadingAnchor.constraint(equalTo: backdrop.leadingAnchor),
             editor.trailingAnchor.constraint(equalTo: backdrop.trailingAnchor),
-            editor.topAnchor.constraint(equalTo: top),
+            editor.topAnchor.constraint(equalTo: previewHeader.bottomAnchor),
             editor.bottomAnchor.constraint(equalTo: backdrop.bottomAnchor)
         ])
     }
 
     func frameSize(forEditorSize size: NSSize) -> NSSize {
-        let chrome = max(0, frame.height - contentLayoutRect.height)
-        return NSSize(width: size.width, height: size.height + chrome)
+        NSSize(width: size.width, height: size.height + MenuBarEditorTokens.previewHeaderHeight)
     }
 
     override func cancelOperation(_ sender: Any?) { onCancel() }

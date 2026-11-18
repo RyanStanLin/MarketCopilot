@@ -19,7 +19,6 @@ struct MenuBarTokenEditor: View {
                 .padding(.bottom, MenuBarEditorTokens.scrollerHeight)
         }
         .frame(height: MenuBarEditorTokens.height + MenuBarEditorTokens.scrollerHeight)
-        .background(MenuBarEditorTokens.background, in: .rect(cornerRadius: 8))
         .onChange(of: store.isMenuBarEditorOpen) { _, open in if !open { drag.reset() } }
         .onDisappear { drag.reset() }
         .environment(\.locale, store.locale)

@@ -1,10 +1,9 @@
 import AppKit
-import CoreImage.CIFilterBuiltins
 import QuartzCore
 import SwiftUI
 
 /// This native boundary clips every descendant, including AppKit combo-box layers.
-/// Core Image filters the actual composited content, so controls stay live while blurring.
+/// Only the alpha mask fades overflowing content; controls are never raster-filtered.
 final class MenuBarViewportView: NSView {
     let host: NSHostingView<MenuBarTokenLane>
     private let driver: MenuBarScrollDriver
@@ -66,26 +65,6 @@ final class MenuBarViewportView: NSView {
             .map { CGColor(gray: 1, alpha: $0) }
         CATransaction.commit()
 
-        guard left > 0 || right > 0 else { contentFilters = []; return }
-        let imageBounds = CGRect(origin: .zero, size: CGSize(width: bounds.width * scale, height: bounds.height * scale))
-        let edge = min(MenuBarEditorTokens.edgeWidth * scale, imageBounds.width / 2)
-        let leading = CIFilter.linearGradient()
-        leading.point0 = .zero
-        leading.point1 = CGPoint(x: edge, y: 0)
-        leading.color0 = CIColor(red: left, green: left, blue: left)
-        leading.color1 = .black
-        let trailing = CIFilter.linearGradient()
-        trailing.point0 = CGPoint(x: imageBounds.width - edge, y: 0)
-        trailing.point1 = CGPoint(x: imageBounds.width, y: 0)
-        trailing.color0 = .black
-        trailing.color1 = CIColor(red: right, green: right, blue: right)
-        let maximum = CIFilter.maximumCompositing()
-        maximum.inputImage = leading.outputImage?.cropped(to: imageBounds)
-        maximum.backgroundImage = trailing.outputImage?.cropped(to: imageBounds)
-        let blur = CIFilter.maskedVariableBlur()
-        blur.mask = maximum.outputImage?.cropped(to: imageBounds)
-        blur.radius = Float(MenuBarEditorTokens.edgeBlurRadius * scale)
-        contentFilters = [blur]
     }
 
     private static func strength(_ distance: CGFloat) -> CGFloat {

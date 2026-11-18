@@ -8,7 +8,7 @@ enum MenuBarEditorTokens {
     static let height: CGFloat = 50
     static let scrollerHeight: CGFloat = 8
     static let edgeWidth: CGFloat = 24
-    static let edgeBlurRadius: CGFloat = 6
+    static let previewHeaderHeight: CGFloat = 40
     static let addWidth: CGFloat = 57
     static let inset: CGFloat = 8
     static let gap: CGFloat = 4
@@ -18,7 +18,6 @@ enum MenuBarEditorTokens {
     static let pickerWidth: CGFloat = 100
     static let globalPickerWidth: CGFloat = 180
     static let controlHeight: CGFloat = 24
-    static let background = Color(nsColor: .windowBackgroundColor)
     static let tokenBackground = Color(nsColor: .controlBackgroundColor)
     static let border = Color(nsColor: .secondarySystemFill)
     static let shadow = Color(nsColor: .shadowColor)

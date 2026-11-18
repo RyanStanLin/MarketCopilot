@@ -16,6 +16,8 @@ final class MenuBarScrollDriver {
                 }
         }
         scrollView = view
+        if view.drawsBackground { view.drawsBackground = false }
+        if view.contentView.drawsBackground { view.contentView.drawsBackground = false }
         view.contentView.wantsLayer = true
         view.contentView.clipsToBounds = true
         view.contentView.layer?.masksToBounds = true
