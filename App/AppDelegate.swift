@@ -12,7 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var clickMonitor: Any?
     private var localMonitor: Any?
     private var settingsWindow: NSWindow?
-    private var menuBarSettingsWindow: NSWindow?
+    private var menuBarSettingsWindow: MenuBarToolPanel?
     private var alertWindow: NSWindow?
     private var isTrackingContextMenu = false
     private var coordinator: AppCoordinator?
@@ -33,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.alertWindow?.title = L10n.text("Position alerts")
             self?.menuBarSettingsWindow?.title = L10n.text("Customize Menu Bar")
             self?.updateStatus()
+            self?.positionMenuBarSettings()
         }
         store.renderedMenuHeightChanged = { [weak self] height in self?.resizeMenu(height: height) }
         updateStatus()
@@ -79,6 +80,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) { coordinator?.stop() }
 
     @objc private func toggleMenu() {
+        closeMenuBarSettings()
         guard let button = statusItem?.button, let window = button.window else { return }
         if store.isMenuOpen { closeMenu(); return }
         let menu = panel ?? MenuPanel()
@@ -122,19 +124,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showMenuBarSettings() {
         closeMenu()
         if menuBarSettingsWindow == nil {
-            let size = NSSize(width: MenuBarEditorTokens.width, height: MenuBarEditorTokens.height)
-            let window = NSWindow(contentRect: NSRect(origin: .zero, size: size),
-                                  styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+            let window = MenuBarToolPanel()
             window.title = L10n.text("Customize Menu Bar")
-            window.contentView = NSHostingView(rootView: MenuBarTokenEditor(store: store))
-            window.contentMinSize = size
-            window.contentMaxSize = NSSize(width: .greatestFiniteMagnitude, height: size.height)
-            window.isReleasedWhenClosed = false
-            window.center()
+            let host = NSHostingView(rootView: MenuBarTokenEditor(store: store).padding(MenuBarEditorTokens.overflow))
+            host.sizingOptions = []
+            window.contentView = host
+            window.onCancel = { [weak self] in self?.closeMenuBarSettings() }
             menuBarSettingsWindow = window
         }
-        NSApp.activate()
+        store.isMenuBarEditorOpen = true
+        positionMenuBarSettings()
         menuBarSettingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    private func positionMenuBarSettings() {
+        guard store.isMenuBarEditorOpen, let tool = menuBarSettingsWindow,
+              let button = statusItem?.button, let window = button.window else { return }
+        let anchor = window.convertToScreen(button.convert(button.bounds, to: nil))
+        let screen = (window.screen ?? NSScreen.main)?.visibleFrame ?? .zero
+        let width = min(MenuBarEditorTokens.preferredWidth(store.refreshSettings.menuBarTokens), max(81, screen.width - 16))
+        let height = MenuBarEditorTokens.height + MenuBarEditorTokens.scrollerHeight
+        let x = min(max(screen.minX + 8, anchor.midX - width / 2), screen.maxX - width - 8)
+        let overflow = MenuBarEditorTokens.overflow
+        tool.setFrame(NSRect(x: x - overflow, y: anchor.minY - 4 - height - overflow,
+                             width: width + overflow * 2, height: height + overflow * 2), display: true)
+    }
+
+    private func closeMenuBarSettings() {
+        store.isMenuBarEditorOpen = false
+        menuBarSettingsWindow?.orderOut(nil)
     }
 
     private func showAlertSettings(target: AlertTarget, selectedRuleID: UUID?) {
@@ -198,7 +216,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(contextMenuEnded), name: NSMenu.didEndTrackingNotification, object: nil)
         clickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             let point = NSEvent.mouseLocation
-            Task { @MainActor in self?.dismissIfOutside(point) }
+            Task { @MainActor in self?.dismissIfOutside(point); self?.dismissMenuBarSettingsIfOutside(point) }
         }
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .keyDown]) { [weak self] event in
             guard let self else { return event }
@@ -210,6 +228,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             if event.type != .keyDown {
                 self.dismissIfOutside(NSEvent.mouseLocation)
+                // Combo-box popup windows are separate AppKit windows; leave their selection intact.
+                if event.window === self.settingsWindow || event.window === self.alertWindow || event.window === self.panel {
+                    self.dismissMenuBarSettingsIfOutside(NSEvent.mouseLocation)
+                }
             }
             return event
         }
@@ -220,6 +242,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard store.isMenuOpen, let panel, let button = statusItem?.button, let window = button.window else { return }
         let statusFrame = window.convertToScreen(button.convert(button.bounds, to: nil))
         if MenuInteraction.shouldDismiss(point: point, menuFrame: panel.frame, statusFrame: statusFrame) { closeMenu() }
+    }
+
+    private func dismissMenuBarSettingsIfOutside(_ point: CGPoint) {
+        guard store.isMenuBarEditorOpen, let tool = menuBarSettingsWindow,
+              !tool.frame.contains(point) else { return }
+        closeMenuBarSettings()
     }
 
     @objc private func contextMenuBegan(_ notification: Notification) { if store.isMenuOpen { isTrackingContextMenu = true } }

@@ -13,6 +13,7 @@ final class AppStore {
     var perpsWebsiteURL = (try? APIConfiguration.bundled())?.perpsWebsite
     var predictionWebsiteURL = (try? APIConfiguration.bundled())?.predictionWebsite
     var isMenuOpen = false
+    var isMenuBarEditorOpen = false
     var isPerpsExpanded = false
     var isPredictionsExpanded = false
     var drawerKeyboardRequest = 0
