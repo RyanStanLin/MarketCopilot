@@ -9,7 +9,7 @@ struct PositionToken: View {
     let number: Decimal?
     let metric: LiveMetricKind
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.accessibilityContrast) private var contrast
+    @Environment(\.colorSchemeContrast) private var colorContrast
 
     var body: some View {
         HStack(spacing: 0) {
@@ -31,9 +31,9 @@ struct PositionToken: View {
     private var labelColor: Color {
         let name: NSAppearance.Name
         if colorScheme == .dark {
-            name = contrast == .increased ? .accessibilityHighContrastDarkAqua : .darkAqua
+            name = colorContrast == .increased ? .accessibilityHighContrastDarkAqua : .darkAqua
         } else {
-            name = contrast == .increased ? .accessibilityHighContrastAqua : .aqua
+            name = colorContrast == .increased ? .accessibilityHighContrastAqua : .aqua
         }
         var result = positive ? NSColor.systemGreen : NSColor.systemRed
         NSAppearance(named: name)?.performAsCurrentDrawingAppearance {
