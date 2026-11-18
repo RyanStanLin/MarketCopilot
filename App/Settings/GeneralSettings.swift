@@ -33,6 +33,14 @@ struct GeneralSettings: View {
                 }
                 Button("Apply cash offsets", action: applyCashOffsets)
             }
+            Section("Menu Bar") {
+                Button("Customize Menu Bar…", action: store.openMenuBarSettings)
+                Button("Restore default Menu Bar", action: store.restoreMenuBarDefaults)
+                Text("Combine metrics or the app icon. Drag a token's left handle to reorder; use its right button to remove it. Changes are saved immediately.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Text("With no tokens, the app icon keeps the menu accessible.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section("Startup") {
                 Toggle("Launch at login", isOn: $store.refreshDraft.launchAtLogin)
                 if SMAppService.mainApp.status == .requiresApproval {

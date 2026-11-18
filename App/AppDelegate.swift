@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var clickMonitor: Any?
     private var localMonitor: Any?
     private var settingsWindow: NSWindow?
+    private var menuBarSettingsWindow: NSWindow?
     private var alertWindow: NSWindow?
     private var isTrackingContextMenu = false
     private var coordinator: AppCoordinator?
@@ -25,10 +26,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.setAccessibilityLabel(MarketCore.name)
         statusItem = item
         store.openSettings = { [weak self] in self?.showSettings() }
+        store.openMenuBarSettings = { [weak self] in self?.showMenuBarSettings() }
         store.openAlertSettings = { [weak self] target, ruleID in self?.showAlertSettings(target: target, selectedRuleID: ruleID) }
         store.displayPreferencesChanged = { [weak self] in
             self?.settingsWindow?.title = L10n.text("MarketCopilot Settings")
             self?.alertWindow?.title = L10n.text("Position alerts")
+            self?.menuBarSettingsWindow?.title = L10n.text("Customize Menu Bar")
             self?.updateStatus()
         }
         store.renderedMenuHeightChanged = { [weak self] height in self?.resizeMenu(height: height) }
@@ -116,6 +119,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !store.isMenuOpen { toggleMenu() }
     }
 
+    private func showMenuBarSettings() {
+        closeMenu()
+        if menuBarSettingsWindow == nil {
+            let size = NSSize(width: MenuBarEditorTokens.width, height: MenuBarEditorTokens.height)
+            let window = NSWindow(contentRect: NSRect(origin: .zero, size: size),
+                                  styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+            window.title = L10n.text("Customize Menu Bar")
+            window.contentView = NSHostingView(rootView: MenuBarTokenEditor(store: store))
+            window.contentMinSize = size
+            window.contentMaxSize = NSSize(width: .greatestFiniteMagnitude, height: size.height)
+            window.isReleasedWhenClosed = false
+            window.center()
+            menuBarSettingsWindow = window
+        }
+        NSApp.activate()
+        menuBarSettingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
     private func showAlertSettings(target: AlertTarget, selectedRuleID: UUID?) {
         closeMenu()
         let window = alertWindow ?? NSWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 720),
@@ -156,21 +177,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.addSubview(host)
             statusHost = host
         }
-        let portfolioWidth = max(textWidth(MarketFormat.currency(store.statusPortfolio), size: 13), textWidth(L10n.text("Portfolio"), size: 10))
-        let cashWidth = max(textWidth(MarketFormat.currency(store.statusCash), size: 13), textWidth(L10n.text("Cash"), size: 10))
-        let width = ceil((portfolioWidth + cashWidth + 8) * min(1, height / 26)) + 12
+        let tokens = store.statusTokens
+        let contentWidth = tokens.reduce(0) { $0 + $1.width } + CGFloat(max(0, tokens.count - 1)) * 8
+        let width = ceil(contentWidth * min(1, height / DesignTokens.statusHeight)) + 12
         item.length = width
         statusHost?.frame = NSRect(x: 0, y: 0, width: width, height: height)
-        button.toolTip = store.statusDescription
-    }
-
-    private func textWidth(_ text: String, size: CGFloat) -> CGFloat {
-        (text as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: size)]).width
+        button.toolTip = store.menuBarStatusDescription
     }
 
     private func observeStatus() {
         withObservationTracking {
-            _ = store.statusPortfolio; _ = store.statusCash; _ = store.statusDescription
+            _ = store.statusTokens; _ = store.statusDescription
         } onChange: { [weak self] in
             Task { @MainActor in self?.updateStatus(); self?.observeStatus() }
         }
