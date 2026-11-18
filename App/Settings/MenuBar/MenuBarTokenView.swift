@@ -4,7 +4,7 @@ import SwiftUI
 struct MenuBarTokenView: View {
     let token: MenuBarToken
     let store: AppStore
-    @Binding var draggedID: UUID?
+    let drag: MenuBarReorderState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var targets: [MenuBarTarget] {
@@ -35,18 +35,14 @@ struct MenuBarTokenView: View {
                 .accessibilityLabel(Text("Reorder token"))
                 .accessibilityAction(named: Text("Move left")) { step(-1) }
                 .accessibilityAction(named: Text("Move right")) { step(1) }
-                .onDrag {
-                    draggedID = token.id
-                    let provider = NSItemProvider()
-                    let data = Data(token.id.uuidString.utf8)
-                    provider.registerDataRepresentation(forTypeIdentifier: MenuBarDragType.token.identifier, visibility: .ownProcess) { completion in
-                        completion(data, nil)
-                        return nil
+                .gesture(DragGesture(minimumDistance: 3, coordinateSpace: .named("menuBarEditor"))
+                    .onChanged { value in
+                        drag.update(id: token.id, value: value, tokens: store.refreshSettings.menuBarTokens, reduceMotion: reduceMotion)
                     }
-                    return provider
-                } preview: {
-                    Text(token.metric.title).padding(8).background(.regularMaterial, in: .rect(cornerRadius: 8))
-                }
+                    .onEnded { _ in
+                        store.reorderMenuBarTokens(drag.order)
+                        drag.settle(reduceMotion: reduceMotion)
+                    })
             HStack(alignment: .bottom, spacing: 6) {
                 MenuBarComboBox(choices: MenuBarMetric.allCases.map { MenuBarChoice(id: $0.rawValue, title: $0.title) },
                                 selection: token.metric.rawValue, placeholder: L10n.text("Metric"), onSelect: selectMetric)
@@ -70,8 +66,6 @@ struct MenuBarTokenView: View {
         .background(MenuBarEditorTokens.tokenBackground, in: MenuBarEditorTokens.shape)
         .overlay { MenuBarEditorTokens.shape.strokeBorder(MenuBarEditorTokens.border, lineWidth: 1) }
         .frame(height: MenuBarEditorTokens.tokenHeight)
-        .onDrop(of: [MenuBarDragType.token], delegate: MenuBarDropDelegate(store: store, targetID: token.id,
-                                                                       draggedID: $draggedID, reduceMotion: reduceMotion))
     }
 
     private func selectMetric(_ id: String) {

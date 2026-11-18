@@ -229,7 +229,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if event.type != .keyDown {
                 self.dismissIfOutside(NSEvent.mouseLocation)
                 // Combo-box popup windows are separate AppKit windows; leave their selection intact.
-                if event.window === self.settingsWindow || event.window === self.alertWindow || event.window === self.panel {
+                if let window = event.window,
+                   window === self.settingsWindow || window === self.alertWindow || window === self.panel {
                     self.dismissMenuBarSettingsIfOutside(NSEvent.mouseLocation)
                 }
             }
@@ -246,7 +247,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func dismissMenuBarSettingsIfOutside(_ point: CGPoint) {
         guard store.isMenuBarEditorOpen, let tool = menuBarSettingsWindow,
-              !tool.frame.contains(point) else { return }
+              !tool.frame.insetBy(dx: MenuBarEditorTokens.overflow, dy: MenuBarEditorTokens.overflow).contains(point) else { return }
         closeMenuBarSettings()
     }
 

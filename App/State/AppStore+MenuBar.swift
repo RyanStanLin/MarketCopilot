@@ -94,6 +94,13 @@ extension AppStore {
 
     func restoreMenuBarDefaults() { setMenuBarTokens(MenuBarToken.defaultLayout) }
 
+    func reorderMenuBarTokens(_ ids: [UUID]) {
+        let tokens = refreshSettings.menuBarTokens
+        let byID = Dictionary(uniqueKeysWithValues: tokens.map { ($0.id, $0) })
+        let wanted = Set(ids)
+        setMenuBarTokens(ids.compactMap { byID[$0] } + tokens.filter { !wanted.contains($0.id) })
+    }
+
     private func setMenuBarTokens(_ tokens: [MenuBarToken]) {
         guard tokens != refreshSettings.menuBarTokens else { return }
         refreshSettings.menuBarTokens = tokens
