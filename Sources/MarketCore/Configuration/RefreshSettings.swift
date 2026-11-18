@@ -11,11 +11,13 @@ public struct RefreshSettings: Codable, Equatable, Sendable {
     public var perpsCashOffset: Decimal = 0
     public var liveColor = LiveColorSettings()
     public var timeSensitiveNotifications = true
+    public var menuBarTokens = MenuBarToken.defaultLayout
     public init() {}
 
     enum CodingKeys: String, CodingKey {
         case predictionMode, perpsMode, pollingInterval, reconciliationInterval, launchAtLogin, language
         case predictionCashOffset, perpsCashOffset, cashOffset, liveColor, timeSensitiveNotifications
+        case menuBarTokens
     }
 
     public init(from decoder: any Decoder) throws {
@@ -28,6 +30,7 @@ public struct RefreshSettings: Codable, Equatable, Sendable {
         language = try values.decodeIfPresent(AppLanguage.self, forKey: .language) ?? .system
         liveColor = try values.decodeIfPresent(LiveColorSettings.self, forKey: .liveColor) ?? LiveColorSettings()
         timeSensitiveNotifications = try values.decodeIfPresent(Bool.self, forKey: .timeSensitiveNotifications) ?? true
+        menuBarTokens = try values.decodeIfPresent([MenuBarToken].self, forKey: .menuBarTokens) ?? MenuBarToken.defaultLayout
         predictionCashOffset = try values.decodeIfPresent(Decimal.self, forKey: .predictionCashOffset) ?? 0
         // Older versions applied one combined offset. Preserve it once under Perps.
         perpsCashOffset = try values.decodeIfPresent(Decimal.self, forKey: .perpsCashOffset)
@@ -44,6 +47,7 @@ public struct RefreshSettings: Codable, Equatable, Sendable {
         try values.encode(language, forKey: .language)
         try values.encode(liveColor, forKey: .liveColor)
         try values.encode(timeSensitiveNotifications, forKey: .timeSensitiveNotifications)
+        try values.encode(menuBarTokens, forKey: .menuBarTokens)
         try values.encode(predictionCashOffset, forKey: .predictionCashOffset)
         try values.encode(perpsCashOffset, forKey: .perpsCashOffset)
     }
