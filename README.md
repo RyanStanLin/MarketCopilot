@@ -92,7 +92,8 @@ Google / 邮箱登录方式本身不决定高级配置的 Wallet type：2026 年
 
 - 菜单栏持续显示两类资产的合计 Portfolio 与合计 Cash。
 - General / 通用 → **Menu Bar / 菜单栏 → Customize Menu Bar… / 自定义菜单栏…** 打开按 Figma `19:519` 实现的横向 token 编辑栏。通过 **Add / 添加** 增加 token，左侧手柄左右拖动排序，右侧 `×` 删除；选择框支持输入并自动补全已有选项。修改立即更新菜单栏并经 SwiftData 保存，无需 Save & Connect。token 较多时可横向滚动编辑栏，Add 按钮保持可见。
-- 编辑器使用无标题栏的迷你浮动工具面板，宽度随 token 数量收紧，最多保留设计中的 717 pt，出现在当前菜单栏项正下方并避开屏幕边缘；按 Escape 或点击面板外收起。保留原来的 34 pt token 和间距，另为水平滚动条留出 8 pt。滚动容器允许阴影和动画越过原有裁剪边界，并使用系统 `.scrollEdgeEffectStyle(.soft, for: .horizontal)`，让内容在固定边缘与 Add 控件下方柔和模糊过渡。
+- 编辑器使用类似 macOS Quick Look 的圆角浮动预览面板，带半透明系统材质标题栏、标题和关闭按钮。宽度随 token 数量收紧，最大为设计中的 717 pt，出现在当前菜单栏项下方并避开屏幕边缘；按 Escape、关闭按钮或点击面板外收起。保留 34 pt token、8 pt 内边距和水平滚动条空间。
+- token 滚动区与固定 Add 按钮分开布局，由原生 AppKit 视口完整裁剪；选择框、轻晃和拖动都不能绘制到 Add 区域或窗口外。视口使用公开的 Core Image `CIMaskedVariableBlur` 和渐变透明遮罩，边缘模糊半径逐渐增加到 6 pt，透明度在边界降至零；左右效果依据实际滚动距离连续增强，在最左侧仅保留右侧效果，最右侧仅保留左侧效果，中间两侧同时显示。原生选择框保持交互，未使用静态图片替身或依赖工具栏的自动滚动边缘效果。
 - 面板显示期间，token 持续以略有错开的节奏轻晃。拖动手柄会移动同一颗真实 token，保留原来的原生选择框和删除按钮，不创建文字替身；抬起时放大至 1.035×、透明度降至 82%，阴影加深，其他 token 用弹簧动画让位。拖至左右边缘会自动滚动；拖动中仅预览顺序，松手时保存一次，再以弹簧动画落下。系统“减少动态效果”开启时停用轻晃和放大，保留拖动排序。
 - 全局 token 可分别选择合计、Predictions 或 Perps 的 Portfolio / Cash，区分原始官方金额与 **with Offset / 含偏移** 金额。默认保持原来的合计 Portfolio 与 Cash（都包含 offset）。含偏移金额沿用菜单相同口径，不会重复加现金或 offset；单一来源可用时依然显示已知合计。
 - 持仓 token 支持 Position、Price、Entry、Profit、Return percentage、Profit / Loss、Side、Quantity，以及价格变化金额 / 百分比 / 涨跌文字；Perps 另有 Bid、Ask、清算价、Margin、Funding 和杠杆。收益率、盈亏和仓位明细来自当前活跃持仓；价格变化与 Price direction 的 Up / Down / Flat 相对该持仓的入场价 / 平均价，非 24 小时行情涨跌。Profit / Loss 文本依据本人未实现盈亏的正负，Side 显示 Long / Short 或 Yes / No。
@@ -175,6 +176,8 @@ zsh Scripts/validate.sh             # 原生 Keychain / SwiftData / 布局检查
 ```
 
 Debug 的 `--design-preview` 显式启用 Figma 样例；`--expanded` 展开抽屉，`--validate-motion` 记录原生窗口和抽屉的动画中间帧。外观始终实时跟随系统。样例不会作为联网失败后的备用数据，Release 不启用样例模式。组件渲染位于 `build/Validation/`；原生玻璃与桌面背景的最终合成需要在可见桌面上检查。
+
+Debug 的 `--design-preview --menu-bar-preview` 单独打开含溢出 token 的预览面板，不读取保存的账户或连接真实数据；`--preview-dark` 检查深色外观，`--preview-english` 切换英文。面板自己的组件渲染输出到应用缓存中的 `MenuBarPreview-light.png` / `MenuBarPreview-dark.png`；这些组件图片不包含 WindowServer 的桌面玻璃及滤镜最终合成。
 
 详细验收记录与测试映射见 [Docs/Validation.md](Docs/Validation.md)。
 

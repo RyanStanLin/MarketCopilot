@@ -41,6 +41,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         installMonitors()
         NSApp.appearance = nil
         #if DEBUG
+        if CommandLine.arguments.contains("--menu-bar-preview"), store.isDesignPreview {
+            MenuBarEditorPreview.configure(store)
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(400)) { [weak self] in
+                guard let self else { return }
+                self.updateStatus()
+                self.showMenuBarSettings()
+                if let window = self.menuBarSettingsWindow { MenuBarEditorPreview.report(window) }
+            }
+            return
+        }
         if CommandLine.arguments.contains("--validate-native") && store.isDesignPreview {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -128,7 +138,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.title = L10n.text("Customize Menu Bar")
             let host = NSHostingView(rootView: MenuBarTokenEditor(store: store))
             host.sizingOptions = []
-            window.contentView = host
+            window.installEditor(host)
             window.onCancel = { [weak self] in self?.closeMenuBarSettings() }
             menuBarSettingsWindow = window
         }
@@ -145,8 +155,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let width = min(max(220, MenuBarEditorTokens.preferredWidth(store.refreshSettings.menuBarTokens)), screen.width - 16)
         let height = MenuBarEditorTokens.height + MenuBarEditorTokens.scrollerHeight
         let x = min(max(screen.minX + 8, anchor.midX - width / 2), screen.maxX - width - 8)
-        tool.setContentSize(NSSize(width: width, height: height))
         var frame = tool.frame
+        frame.size = tool.frameSize(forEditorSize: NSSize(width: width, height: height))
         frame.origin = NSPoint(x: x, y: anchor.minY - 4 - frame.height)
         tool.setFrame(frame, display: true)
     }
