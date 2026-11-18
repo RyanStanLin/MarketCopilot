@@ -45,7 +45,7 @@ extension AppStore {
     private func saveResolvedWorkspace(draft: AccountConfiguration, refresh: RefreshSettings, secrets: AccountSecrets) async {
         defer { isSavingAccount = false }
         do {
-            let settings = try refresh.validated()
+            var settings = try refresh.validated()
             let configuration = try APIConfiguration.bundled()
             var resolved = draft
             resolved.walletAddress = draft.walletAddress.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -65,6 +65,7 @@ extension AppStore {
             guard let repository else { throw CocoaError(.fileWriteUnknown) }
             let sameAccount = self.account.identity == account.identity
             try KeychainVault().save(secrets, identity: account.identity)
+            settings.menuBarTokens = refreshSettings.menuBarTokens
             try repository.save(account: account, settings: settings,
                                 snapshot: sameAccount ? snapshot : nil, instruments: instruments)
             if !sameAccount {

@@ -21,6 +21,11 @@ final class AppCoordinator {
             controller?.onUpdate = { [weak store] update in store?.apply(update) }
             store.refreshRequested = { [weak self] in Task { await self?.controller?.refresh() } }
             store.settingsApplied = { [weak self] in self?.restart() }
+            store.menuBarTokensChanged = { [weak self] in
+                guard let self, !self.isSleeping else { return }
+                self.controller?.setMenuBarInstrumentIDs(self.store.menuBarQuoteIDs)
+                Task { await self.controller?.refresh() }
+            }
             store.alertRulesChanged = { [weak self] in
                 guard let self, !self.isSleeping else { return }
                 self.controller?.setAlertInstrumentIDs(self.store.monitoredAlertInstrumentIDs)
@@ -48,6 +53,7 @@ final class AppCoordinator {
                           settings: store.refreshSettings, cached: store.snapshot)
         controller?.setDrawerExpanded(store.isPerpsExpanded)
         controller?.setAlertInstrumentIDs(store.monitoredAlertInstrumentIDs)
+        controller?.setMenuBarInstrumentIDs(store.menuBarQuoteIDs)
     }
 
     func stop() {

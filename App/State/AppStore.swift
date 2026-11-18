@@ -52,6 +52,8 @@ final class AppStore {
     @ObservationIgnored var drawerChanged: () -> Void = {}
     @ObservationIgnored var settingsApplied: () -> Void = {}
     @ObservationIgnored var displayPreferencesChanged: () -> Void = {}
+    @ObservationIgnored var menuBarTokensChanged: () -> Void = {}
+    @ObservationIgnored var openMenuBarSettings: () -> Void = {}
     @ObservationIgnored var repository: WorkspaceRepository?
     @ObservationIgnored var activeSecrets = AccountSecrets()
     #if DEBUG

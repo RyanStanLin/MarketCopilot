@@ -24,6 +24,8 @@ enum DesignTokens {
     static let drawerMinimumScale: CGFloat = 0.95
     static let positionHoverOutset: CGFloat = 6
     static let statusHeight: CGFloat = 26
+    static let statusIconSize: CGFloat = 18
+    static let statusCaptionMaximumWidth: CGFloat = 160
     static let collapsedHeight: CGFloat = 404
     static let primary = Color(nsColor: .labelColor)
     static let secondary = Color(nsColor: .secondaryLabelColor)

@@ -16,6 +16,7 @@ public final class PortfolioController {
     var generation = UUID()
     var drawerExpanded = false
     var alertInstrumentIDs = Set<Int>()
+    var menuBarInstrumentIDs = Set<Int>()
     var perpsValidated = false
     var authenticationBlocked = Set<MarketProduct>()
     var retryNotBefore: [MarketProduct: Date] = [:]
@@ -73,6 +74,7 @@ public final class PortfolioController {
         socketTasks = [:]; socketSignatures = [:]; healthySockets = []; streamParsers = [:]
         quoteCache = [:]; authenticationBlocked = []; retryNotBefore = [:]
         alertInstrumentIDs = []; lastQuoteREST = .distantPast; lastQuoteStream = .distantPast
+        menuBarInstrumentIDs = []
         perpsValidated = false; account = nil
         lastPredictionREST = .distantPast; lastPerpsREST = .distantPast
         lastPerpsPush = .distantPast
@@ -93,7 +95,13 @@ public final class PortfolioController {
 
     var requestedQuoteIDs: Set<Int> {
         let held = Set(snapshot.perps?.positions.map(\.id) ?? [])
-        return drawerExpanded ? held : held.intersection(alertInstrumentIDs)
+        return (drawerExpanded ? held : held.intersection(alertInstrumentIDs)).union(menuBarInstrumentIDs)
+    }
+
+    public func setMenuBarInstrumentIDs(_ ids: Set<Int>) {
+        guard ids != menuBarInstrumentIDs else { return }
+        menuBarInstrumentIDs = ids
+        configureSockets()
     }
 
     public func refresh(force: Bool = true) async {
